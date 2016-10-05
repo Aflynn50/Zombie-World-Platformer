@@ -17,9 +17,10 @@ class Game:
     def __init__(self):
         self.FPS = 60
         self.dt = 1 / self.FPS
-        self.DISPLAYSURF = pygame.display.set_mode((960, 576))  # Creates the display surface object
+        self.DISPLAYSURF = pygame.display.set_mode((500, 300))  # Creates the display surface object
         self.player1 = player.Player(self.dt)
         self.screen = map.TiledRenderer(os.path.join("resources/maps/map1.tmx"), self.DISPLAYSURF, self.player1)  # Loads the maps from the tmx file
+        self.player1.walls = self.screen.walls
 
     @staticmethod
     def terminate():  # Shuts down the pygame module and the sys module and
@@ -28,7 +29,8 @@ class Game:
 
     def check_for_quit(self):
         for event in pygame.event.get(QUIT):  # get all the QUIT events
-            self.terminate()  # terminate if any QUIT events are present
+            if event.type == QUIT:
+                self.terminate()  # terminate if any QUIT events are present
         for event in pygame.event.get(KEYUP):  # Check what keys have been released
             if event.key == K_ESCAPE:
                 self.terminate()  # Calls the function to shut down the program
@@ -37,11 +39,10 @@ class Game:
     def run(self):
         self.FPSCLOCK = pygame.time.Clock()  # Starts the FPS counter
 
-
         while True:
             self.screen.draw(self.DISPLAYSURF, self.player1)  # Updates the screen
             self.check_for_quit()
-            self.player1.update()
+            self.player1.update(pygame.key.get_pressed())
             pygame.display.update()  # Transfers the display surface to the monitor
             self.FPSCLOCK.tick(self.FPS)
 
