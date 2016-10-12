@@ -91,8 +91,3 @@ class Player(pygame.sprite.Sprite):
 
         self.old_rect.y = self.rect.y
         self.old_rect.x = self.rect.x
-
-        #if self.collision_list > -1:
-        #    self.jumping = False
-        #    self.rect = self.old_rect
-        #    self.collision = True
