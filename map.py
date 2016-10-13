@@ -31,17 +31,18 @@ class TiledRenderer(object):
         self.spawn_points = list()
         self.player_pos = [0, 0]
 
-        for position in self.tmx_data.get_layer_by_name("spawn_point_layer"):
-            if position.name == "player":
-                self.player_pos = [position.x, position.y]
-            else:
-                self.spawn_points.append([position.x, position.y])
+        #for position in self.tmx_data.get_layer_by_name("spawn_point_layer"):
+        #    if position.name == "player":
+        #        self.player_pos = [position.x, position.y]
+        #    else:
+        #        self.spawn_points.append([position.x, position.y])
 
         # create new data source for pyscroll
         self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
 
         # create new renderer (camera)
         self.map_layer = pyscroll.BufferedRenderer(self.map_data, surface.get_size())
+        self.map_layer.zoom = 1
 
         # pyscroll supports layered rendering.  our map has 3 'under' layers
         # layers begin with 0, so the layers are 0, 1, and 2.

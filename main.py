@@ -19,9 +19,9 @@ class Game:
         self.dt = 1 / self.FPS  # The time for each frame
         self.DISPLAYSURF = pygame.display.set_mode((500, 300))  # Creates the display surface object
         self.player1 = player.Player(self.dt)
-        self.screen = map.TiledRenderer(os.path.join("resources/maps/map1.tmx"), self.DISPLAYSURF, self.player1)  # Loads the maps from the tmx file
+        self.screen = map.TiledRenderer(os.path.join("resources/maps/map6.tmx"), self.DISPLAYSURF, self.player1)  # Loads the maps from the tmx file
         self.player1.walls = self.screen.walls  # Take the walls data from the screen object and transfers it to player
-        self.player1.map_height = self.screen.tmx_data.height * self.screen.tmx_data.tileheight # Transfes the screen width and hight to the player object
+        self.player1.map_height = self.screen.tmx_data.height * self.screen.tmx_data.tileheight  # Transfes the screen width and hight to the player object
         self.player1.map_width = self.screen.tmx_data.width * self.screen.tmx_data.tilewidth
         self.player1.rect.x = self.screen.player_pos[0]
         self.player1.rect.y = self.screen.player_pos[1]
