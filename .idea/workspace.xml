@@ -3,11 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="7ca1be91-1626-459e-8758-977d621478d4" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/enemies.py" afterPath="$PROJECT_DIR$/enemies.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/map.py" afterPath="$PROJECT_DIR$/map.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/player.py" afterPath="$PROJECT_DIR$/player.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/resources/maps/MAP4.tmx" afterPath="$PROJECT_DIR$/resources/maps/MAP4.tmx" />
     </list>
     <ignored path="Platformer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -506,7 +501,14 @@
       <option name="project" value="LOCAL" />
       <updated>1476364990066</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Update 1.05&#10;Fixed the bug with that player that caused it to got faster one way that the other, still working on applying it to the enimies module.">
+      <created>1476698582076</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1476698582076</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -578,7 +580,8 @@
     <MESSAGE value="Update 1.02&#10;Improved collisions" />
     <MESSAGE value="Update 1.03&#10;Updated stuff" />
     <MESSAGE value="Update 1.04&#10;Is this even updateing" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update 1.04&#10;Is this even updateing" />
+    <MESSAGE value="Update 1.05&#10;Fixed the bug with that player that caused it to got faster one way that the other, still working on applying it to the enimies module." />
+    <option name="LAST_COMMIT_MESSAGE" value="Update 1.05&#10;Fixed the bug with that player that caused it to got faster one way that the other, still working on applying it to the enimies module." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
