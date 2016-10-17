@@ -3,6 +3,7 @@ import sys
 import time
 import os
 import math
+import enemies
 from pytmx import *
 from pytmx.util_pygame import load_pygame
 from pygame.locals import *
@@ -13,15 +14,16 @@ from pyscroll.group import PyscrollGroup
 
 class TiledRenderer(object):
 
-    def __init__(self, filename, surface, player):
+    def __init__(self, filename, surface, player, dt):
         tm = load_pygame(filename)
-
+        self.dt = dt
         # self.size will be the pixel size of the map
         # this value is used later to render the entire map to a pygame surface
-        self.pixel_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
+        self.map_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
         # setup level geometry with simple pygame rects, loaded from pytmx
         self.walls = list()
+        self.zombies = list()
 
         for wall in self.tmx_data.get_layer_by_name("collision_layer"):
             self.walls.append(pygame.Rect(
@@ -31,11 +33,11 @@ class TiledRenderer(object):
         self.spawn_points = list()
         self.player_pos = [0, 0]
 
-        #for position in self.tmx_data.get_layer_by_name("spawn_point_layer"):
-        #    if position.name == "player":
-        #        self.player_pos = [position.x, position.y]
-        #    else:
-        #        self.spawn_points.append([position.x, position.y])
+        for position in self.tmx_data.get_layer_by_name("spawn_point_layer"):
+            if position.name == "player":
+                self.player_pos = [position.x, position.y]
+            else:
+                self.spawn_points.append([position.x, position.y])
 
         # create new data source for pyscroll
         self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
@@ -51,14 +53,20 @@ class TiledRenderer(object):
         self.group = PyscrollGroup(map_layer=self.map_layer, default_layer=0)
 
         player.position = self.map_layer.map_rect.center
-
+        self.spawn_zombies()
         self.group.add(player)
 
     def draw(self, surface, player):
 
         # center the map/screen on our Hero
         self.group.center(player.rect.center)
-
         # draw the map and all sprites
 
         self.group.draw(surface)
+
+
+    def spawn_zombies(self):
+        for zombie in self.spawn_points:
+            self.zombies.append(enemies.Zombie(self.dt, self.walls, self.map_size, zombie))
+            print("A")
+            self.group.add(self.zombies[-1])

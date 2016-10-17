@@ -19,7 +19,7 @@ class Game:
         self.dt = 1 / self.FPS  # The time for each frame
         self.DISPLAYSURF = pygame.display.set_mode((500, 300))  # Creates the display surface object
         self.player1 = player.Player(self.dt)
-        self.screen = map.TiledRenderer(os.path.join("resources/maps/map6.tmx"), self.DISPLAYSURF, self.player1)  # Loads the maps from the tmx file
+        self.screen = map.TiledRenderer(os.path.join("resources/maps/map1.tmx"), self.DISPLAYSURF, self.player1, self.dt)  # Loads the maps from the tmx file
         self.player1.walls = self.screen.walls  # Take the walls data from the screen object and transfers it to player
         self.player1.map_height = self.screen.tmx_data.height * self.screen.tmx_data.tileheight  # Transfes the screen width and hight to the player object
         self.player1.map_width = self.screen.tmx_data.width * self.screen.tmx_data.tilewidth
@@ -42,11 +42,20 @@ class Game:
 
     def run(self):
         self.FPSCLOCK = pygame.time.Clock()  # Starts the FPS counter
-
+        #self.menu()
         while True:
             self.screen.draw(self.DISPLAYSURF, self.player1)  # Updates the screen
             self.check_for_quit()
             self.player1.update(pygame.key.get_pressed())
+            for zombie in self.screen.zombies:
+                zombie.update()
+            pygame.display.update()  # Transfers the display surface to the monitor
+            self.FPSCLOCK.tick(self.FPS)
+
+    def menu(self):
+        self.DISPLAYSURF.fill((255, 255, 255))
+        while True:
+            self.check_for_quit()
             pygame.display.update()  # Transfers the display surface to the monitor
             self.FPSCLOCK.tick(self.FPS)
 
