@@ -8,17 +8,20 @@ from pygame.locals import *
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, dt):
+    def __init__(self, dt, pos, map_size, walls):
         pygame.sprite.Sprite.__init__(self)
         #self.image = pygame.image.load(os.path.join("resources/sprites/player.png"))
         self.dt = dt
         self.width = 32
         self.height = 64
         self.image = pygame.Surface([self.width, self.height])
-        self.image.fill((255, 0, 0))
+        self.image.fill((0, 0, 0))
+        self.player_position = pos
         self.rect = self.image.get_rect()
+        self.rect.x = self.player_position[0]
+        self.rect.y = self.player_position[1]
         self.old_rect = pygame.Rect(0, 0, self.width, self.height)
-        self.player_position = list([0, 0])
+        self.player_position = pos
         self.velocity = list([0, 0])
         self.acceleration = -500
         self.PLAYER_MOVE_SPEED = 200
@@ -30,9 +33,10 @@ class Player(pygame.sprite.Sprite):
         self.jumping = True
         self.collision = False
         self.collision_list = []
-        self.walls = list()
-        self.map_height = 0
-        self.map_width = 0
+        self.walls = walls
+        self.map_width = map_size[0]
+        self.map_height = map_size[1]
+
         #pygame.key.set_repeat(int(1000 * self.dt), int(1000 * self.dt))
 
     def update(self, keys):
@@ -96,3 +100,6 @@ class Player(pygame.sprite.Sprite):
         if self.rect != self.old_rect:
             self.old_rect.x = self.rect.x
             self.old_rect.y = self.rect.y
+
+    #def animation(self):
+

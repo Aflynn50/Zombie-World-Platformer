@@ -14,7 +14,7 @@ from pyscroll.group import PyscrollGroup
 
 class TiledRenderer(object):
 
-    def __init__(self, filename, surface, player, dt):
+    def __init__(self, filename, surface, dt):
         tm = load_pygame(filename)
         self.dt = dt
         # self.size will be the pixel size of the map
@@ -52,9 +52,9 @@ class TiledRenderer(object):
         # layer for sprites as 2
         self.group = PyscrollGroup(map_layer=self.map_layer, default_layer=0)
 
-        player.position = self.map_layer.map_rect.center
+        #player.position = self.map_layer.map_rect.center
         self.spawn_zombies()
-        self.group.add(player)
+        #self.group.add(player)
 
     def draw(self, surface, player):
 
@@ -64,9 +64,44 @@ class TiledRenderer(object):
 
         self.group.draw(surface)
 
-
     def spawn_zombies(self):
         for zombie in self.spawn_points:
             self.zombies.append(enemies.Zombie(self.dt, self.walls, self.map_size, zombie))
-            print("A")
             self.group.add(self.zombies[-1])
+
+    def add_sprites(self, sprites):
+        for sprite in sprites:
+            self.group.add(sprite)
+
+
+class Menu(object):
+
+    def __init__(self, surface):
+        pygame.font.init()
+        self.screen_size = surface.get_size()
+        self.button_font = pygame.font.SysFont("magneto", 25)
+        self.title_font = pygame.font.SysFont("magneto", 40)
+        self.play_button = pygame.Surface([self.screen_size[0], 50])
+        self.play_button.fill((0, 0, 0))
+        self.play_button.blit(self.button_font.render("Play", 1, (255, 255, 255)), (20, 15))
+        self.title = self.title_font.render("Zombie world", 1, (0, 0, 0))
+        self.play_rect = self.play_button.get_rect()
+        self.play_rect.x = 0
+        self.play_rect.y = 100
+
+    def update(self, surface):
+        surface.fill((255, 255, 255))
+        surface.blit(self.play_button, (0, 100))
+        surface.blit(self.title, (100, 0))
+
+    def click(self, position):
+        if self.play_rect.collidepoint(position):
+            return True
+        return False
+
+
+
+
+
+
+

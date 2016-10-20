@@ -14,26 +14,31 @@ class Zombie(pygame.sprite.Sprite):
 
     def __init__(self, dt, walls, map_size, pos):
         pygame.sprite.Sprite.__init__(self)
-        #self.image = pygame.image.load(os.path.join("resources/sprites/player.png"))
         self.dt = dt
         self.width = 32
-        self.height = 64
+        self.height = 32
         self.image = pygame.Surface([self.width, self.height])
-        self.image.fill((0, 0, 255))
         self.rect = self.image.get_rect()
-        print(pos[0])
         self.rect.x = pos[0]
         self.rect.y = pos[1]
         self.old_rect = pygame.Rect(pos[0], pos[1], self.width, self.height)
+        self.tile_set = pygame.image.load(os.path.join("resources/sprites/zombie_tileset.png"))
+        self.tile_size = list([32, 32])
+        self.tileset_image_size = self.tile_set.get_size()
+        self.zombie_tiles = list()
         self.acceleration = -500
+        self.zombie_position = pos
         self.velocity = list([0, 0])
-        self.ZOMBIE_MOVE_SPEED = 100
+        self.ZOMBIE_MOVE_SPEED = 65
         self.collision_list = []
         self.walls = walls
+        self.animation_counter = 0
         self.map_size = map_size
         self.direction = True  # True is right, False is left
+        self.load_zombie_tileset()
 
     def update(self):
+        self.image.blit(self.zombie_tiles[0][0], (0, 0))
         self.collision_list = []
 
         if self.direction:
@@ -42,8 +47,10 @@ class Zombie(pygame.sprite.Sprite):
             self.velocity[0] = -self.ZOMBIE_MOVE_SPEED
 
         self.velocity[1] -= self.dt * self.acceleration
-        self.rect.x += self.dt * self.velocity[0]
-        self.rect.y += self.dt * self.velocity[1]
+        self.zombie_position[0] += self.dt * self.velocity[0]
+        self.zombie_position[1] += self.dt * self.velocity[1]
+        self.rect.x = self.zombie_position[0]
+        self.rect.y = self.zombie_position[1]
 
         for wall_num in range(len(self.walls)):
             if self.rect.colliderect(self.walls[wall_num]):
@@ -51,26 +58,35 @@ class Zombie(pygame.sprite.Sprite):
 
         for collision_wall_num in self.collision_list:
             if self.rect.x <= self.walls[collision_wall_num].right <= self.old_rect.x:
-                self.rect.x = self.walls[collision_wall_num].right
+                self.zombie_position[0] = self.walls[collision_wall_num].right
                 self.direction = True
 
             if self.rect.right >= self.walls[collision_wall_num].x >= self.old_rect.right:
-                self.rect.right = self.walls[collision_wall_num].x
+                self.zombie_position[0] = self.walls[collision_wall_num].x - self.width
                 self.direction = False
 
             if self.rect.bottom >= self.walls[collision_wall_num].y >= self.old_rect.bottom:
                 self.velocity[1] = 0
-                self.rect.bottom = self.walls[collision_wall_num].y
+                self.zombie_position[1] = self.walls[collision_wall_num].y - self.height
 
         if self.rect.right >= self.map_size[0]:
-            self.rect.right = self.map_size[0]
+            self.zombie_position[0] = self.map_size[0] - self.width
             self.direction = False
         if self.rect.x <= 0:
-            self.rect.x = 0
+            self.zombie_position[0] = 0
             self.direction = True
 
-        self.old_rect.y = self.rect.y
-        self.old_rect.x = self.rect.x
+        self.rect.x = self.zombie_position[0]
+        self.rect.y = self.zombie_position[1]
+        if self.rect != self.old_rect:
+            self.old_rect.x = self.rect.x
+            self.old_rect.y = self.rect.y
 
+    def load_zombie_tileset(self):
+        for x in range(0, int(self.tileset_image_size[0] / self.tile_size[0])):
+            self.zombie_tiles.append(list([]))
+            for y in range(0, int(self.tileset_image_size[1] / self.tile_size[1])):
+                rect = pygame.Rect((x * self.tile_size[0]), (y * self.tile_size[1]), self.tile_size[0], self.tile_size[1])
+                self.zombie_tiles[x].append(self.tile_set.subsurface(rect))
 
 
