@@ -23,9 +23,14 @@ class TiledRenderer(object):
         self.tmx_data = tm
         # setup level geometry with simple pygame rects, loaded from pytmx
         self.walls = list()
+        self.wall_type = list()
         self.zombies = list()
 
         for wall in self.tmx_data.get_layer_by_name("collision_layer"):
+            if wall.name == "platform":
+                self.wall_type.append("platform")
+            else:
+                self.wall_type.append("solid")
             self.walls.append(pygame.Rect(
                 wall.x, wall.y,
                 wall.width, wall.height))

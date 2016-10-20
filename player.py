@@ -8,14 +8,14 @@ from pygame.locals import *
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, dt, pos, map_size, walls):
+    def __init__(self, dt, pos, map_size, walls, wall_type):
         pygame.sprite.Sprite.__init__(self)
         #self.image = pygame.image.load(os.path.join("resources/sprites/player.png"))
         self.dt = dt
-        self.width = 32
+        self.width = 64
         self.height = 64
-        self.image = pygame.Surface([self.width, self.height])
-        self.image.fill((0, 0, 0))
+        self.image = pygame.Surface([self.width, self.height], pygame.SRCALPHA, 32)
+        #self.image.fill((0, 100, 0))
         self.player_position = pos
         self.rect = self.image.get_rect()
         self.rect.x = self.player_position[0]
@@ -26,7 +26,11 @@ class Player(pygame.sprite.Sprite):
         self.acceleration = -500
         self.PLAYER_MOVE_SPEED = 200
         self.PLAYER_JUMP_SPEED = 300
-        #self.collision_rect = pygame.Rect(0, 0, self.width, self.height)
+        self.animation_speed = 5
+        self.trans_colour = (236, 153, 46)
+        self.image.set_colorkey(self.trans_colour)
+        self.time = time.clock() * self.animation_speed
+        self.av = 10
         self.left = False
         self.right = False
         self.up = False
@@ -34,6 +38,7 @@ class Player(pygame.sprite.Sprite):
         self.collision = False
         self.collision_list = []
         self.walls = walls
+        self.wall_type = wall_type
         self.map_width = map_size[0]
         self.map_height = map_size[1]
 
@@ -75,10 +80,12 @@ class Player(pygame.sprite.Sprite):
                 self.collision_list.append(wall_num)
 
         for collision_wall_num in self.collision_list:
-            if self.rect.x <= self.walls[collision_wall_num].right <= self.old_rect.x:
+            if self.rect.x <= self.walls[collision_wall_num].right <= self.old_rect.x and self.wall_type[
+                    collision_wall_num] == "solid":
                 self.player_position[0] = self.walls[collision_wall_num].right
 
-            if self.rect.right >= self.walls[collision_wall_num].x >= self.old_rect.right:
+            if self.rect.right >= self.walls[collision_wall_num].x >= self.old_rect.right and self.wall_type[
+                    collision_wall_num] == "solid":
                 self.player_position[0] = self.walls[collision_wall_num].x - self.width
 
             if self.rect.bottom >= self.walls[collision_wall_num].y >= self.old_rect.bottom:
@@ -100,6 +107,24 @@ class Player(pygame.sprite.Sprite):
         if self.rect != self.old_rect:
             self.old_rect.x = self.rect.x
             self.old_rect.y = self.rect.y
+        self.animation()
 
-    #def animation(self):
+    def animation(self):
+        self.image = pygame.Surface([self.width, self.height], pygame.SRCALPHA, 32)
+        #self.image.fill(self.trans_colour)
+        #self.image.set_colorkey(self.trans_colour)
+        if self.right:
+            self.points_list = [(self.av, 0), (self.width, 0), (self.width - self.av, self.height),(0, self.height)]
+            pygame.draw.polygon(self.image, (0, 0, 0), self.points_list)
+            print("c")
+        elif self.left:
+            self.points_list = [(0, 0), (self.width - self.av, 0), (self.width, self.height), (self.av, self.height)]
+            pygame.draw.polygon(self.image, (0, 0, 0), self.points_list)
+            print("b")
+        else:
+            self.points_list = [(self.av, 0), (self.width - self.av, 0), (self.width - self.av, self.height), (self.av, self.height)]
+            pygame.draw.polygon(self.image, (0, 0, 0), self.points_list)
+            print("a")
+
+
 

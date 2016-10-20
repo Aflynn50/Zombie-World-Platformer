@@ -3,16 +3,17 @@ import sys
 import time
 import os
 import math
-import pytmx
 import collision
 import map
 import player
 from pygame.locals import *
+from pygame import gfxdraw
 
 
 class Game:
 
     pygame.init()
+
 
     def __init__(self):
         self.FPS = 60
@@ -23,7 +24,7 @@ class Game:
         self.game_over_font = pygame.font.SysFont("magneto", 80)
         self.sprites = list()
         self.screen = map.TiledRenderer(os.path.join("resources/maps/map8.tmx"), self.DISPLAYSURF, self.dt)  # Loads the maps from the tmx file
-        self.player1 = player.Player(self.dt, self.screen.player_pos, self.screen.map_size, self.screen.walls)
+        self.player1 = player.Player(self.dt, self.screen.player_pos, self.screen.map_size, self.screen.walls, self.screen.wall_type)
         self.sprites.append(self.player1)
         self.screen.add_sprites(self.sprites)
         self.game_over_animation_rect = pygame.Rect(0, 0, self.screen_size[0], 0)
@@ -50,6 +51,7 @@ class Game:
         while True:
             self.screen.draw(self.DISPLAYSURF, self.player1)  # Updates the screen
             self.check_for_quit()
+            #pygame.gfxdraw.pixel(self.DISPLAYSURF, 1, 1, (0, 0, 0))
             self.keys = pygame.key.get_pressed()
             self.player1.update(self.keys)
             for zombie in self.screen.zombies:
@@ -77,14 +79,14 @@ class Game:
     def game_over(self):
         while True:
             self.check_for_quit()
-            pygame.draw.rect(self.DISPLAYSURF, (255, 255, 255), self.game_over_animation_rect)
+            pygame.draw.rect(self.DISPLAYSURF, (0, 0, 0), self.game_over_animation_rect)
 
             if self.game_over_animation_rect.h > self.screen_size[1] and not self.animation_finished:
                 self.animation_finished = True
             elif not self.animation_finished:
                 self.game_over_animation_rect.h += 8
             else:
-                self.DISPLAYSURF.blit(self.game_over_font.render("Game over", 1, (0, 0, 0)), (20, 100))
+                self.DISPLAYSURF.blit(self.game_over_font.render("Game over", 1, (255, 255, 255)), (20, 100))
 
             pygame.display.update()  # Transfers the display surface to the monitor
             self.FPSCLOCK.tick(self.FPS)
