@@ -78,6 +78,13 @@ class TiledRenderer(object):
         for sprite in sprites:
             self.group.add(sprite)
 
+    def remove_sprites(self, sprites):
+        for sprite in sprites:
+            self.group.remove(sprite)
+
+    def add_animation(self, rects):
+        for rect in rects:
+            self.group.add(rect)
 
 class Menu(object):
 
@@ -87,21 +94,30 @@ class Menu(object):
         self.button_font = pygame.font.SysFont("magneto", 25)
         self.title_font = pygame.font.SysFont("magneto", 40)
         self.play_button = pygame.Surface([self.screen_size[0], 50])
+        self.exit_button = pygame.Surface([self.screen_size[0], 50])
         self.play_button.fill((0, 0, 0))
+        self.exit_button.fill((0, 0, 0))
         self.play_button.blit(self.button_font.render("Play", 1, (255, 255, 255)), (20, 15))
+        self.exit_button.blit(self.button_font.render("Exit", 1, (255, 255, 255)), (20, 15))
         self.title = self.title_font.render("Zombie world", 1, (0, 0, 0))
         self.play_rect = self.play_button.get_rect()
+        self.exit_rect = self.exit_button.get_rect()
         self.play_rect.x = 0
-        self.play_rect.y = 100
+        self.play_rect.y = 75
+        self.exit_rect.x = 0
+        self.exit_rect.y = 150
 
     def update(self, surface):
         surface.fill((255, 255, 255))
-        surface.blit(self.play_button, (0, 100))
+        surface.blit(self.play_button, (0, 75))
+        surface.blit(self.exit_button, (0, 150))
         surface.blit(self.title, (100, 0))
 
     def click(self, position):
         if self.play_rect.collidepoint(position):
-            return True
+            return "play"
+        elif self.exit_rect.collidepoint(position):
+            return "exit"
         return False
 
 

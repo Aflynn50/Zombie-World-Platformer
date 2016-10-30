@@ -3,6 +3,7 @@ import sys
 import time
 import os
 import math
+import random
 from pygame.locals import *
 
 
@@ -12,10 +13,10 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         #self.image = pygame.image.load(os.path.join("resources/sprites/player.png"))
         self.dt = dt
-        self.width = 64
-        self.height = 64
+        self.width = 32
+        self.height = 32
         self.image = pygame.Surface([self.width, self.height], pygame.SRCALPHA, 32)
-        #self.image.fill((0, 100, 0))
+        self.image.fill((0, 0, 0))
         self.player_position = pos
         self.rect = self.image.get_rect()
         self.rect.x = self.player_position[0]
@@ -31,6 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.image.set_colorkey(self.trans_colour)
         self.time = time.clock() * self.animation_speed
         self.av = 10
+        self.death_animation_rects = list()
         self.left = False
         self.right = False
         self.up = False
@@ -75,6 +77,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = self.player_position[0]
         self.rect.y = self.player_position[1]
 
+        self.jumping = True
+
         for wall_num in range(len(self.walls)):
             if self.rect.colliderect(self.walls[wall_num]):
                 self.collision_list.append(wall_num)
@@ -93,38 +97,57 @@ class Player(pygame.sprite.Sprite):
                 self.player_position[1] = self.walls[collision_wall_num].y - self.height
                 self.jumping = False
 
-        if self.rect.right >= self.map_width:
-            self.player_position[0] = self.map_width - self.width
+        if self.rect.x >= self.map_width:
+            return "win"
 
         if self.rect.x <= 0:
             self.player_position[0] = 0
 
-        if self.rect.bottom >= self.map_height:
-            self.player_position[1] = self.old_rect.y
+        if self.rect.y >= self.map_height:
+            return "lose"
 
         self.rect.x = self.player_position[0]
         self.rect.y = self.player_position[1]
         if self.rect != self.old_rect:
             self.old_rect.x = self.rect.x
             self.old_rect.y = self.rect.y
-        self.animation()
+        return "carry on"
 
-    def animation(self):
-        self.image = pygame.Surface([self.width, self.height], pygame.SRCALPHA, 32)
-        #self.image.fill(self.trans_colour)
-        #self.image.set_colorkey(self.trans_colour)
-        if self.right:
-            self.points_list = [(self.av, 0), (self.width, 0), (self.width - self.av, self.height),(0, self.height)]
-            pygame.draw.polygon(self.image, (0, 0, 0), self.points_list)
-            print("c")
-        elif self.left:
-            self.points_list = [(0, 0), (self.width - self.av, 0), (self.width, self.height), (self.av, self.height)]
-            pygame.draw.polygon(self.image, (0, 0, 0), self.points_list)
-            print("b")
-        else:
-            self.points_list = [(self.av, 0), (self.width - self.av, 0), (self.width - self.av, self.height), (self.av, self.height)]
-            pygame.draw.polygon(self.image, (0, 0, 0), self.points_list)
-            print("a")
+    def death_animation_init_(self):
+        for x in range(0, self.width, int(self.width / 4)):
+            for y in range(0, self.height, int(self.height / 4)):
+                width = int(self.rect.w / 4)
+                height = int(self.rect.h / 4)
+                self.death_animation_rects.append(AnimationRect((self.rect.x + x, self.rect.y + y), (width, height), self.dt))
+        return self.death_animation_rects
+
+    def death_animation_update(self, surface):
+        for rect in self.death_animation_rects:
+            rect.update(surface)
+
+
+class AnimationRect(pygame.sprite.Sprite):
+    def __init__(self, position, size, dt):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface([size[0], size[1]])
+        self.image.fill((0, 0, 0))
+        self.dt = dt
+        self.rect = self.image.get_rect()
+        self.rect.x = position[0]
+        self.rect.y = position[1]
+        self.rect_position = list(position)
+        self.velocity = list([(75 - random.randint(0, 150)), (random.randint(200, 300) * -1)])
+        self.acceleration = -500
+
+    def update(self, surface):
+        self.velocity[1] -= self.dt * self.acceleration
+        self.rect_position[0] += self.dt * self.velocity[0]
+        self.rect_position[1] += self.dt * self.velocity[1]
+        self.rect.x = self.rect_position[0]
+        self.rect.y = self.rect_position[1]
+        if self.rect.y >= 1000:
+            self.kill()
+
 
 
 

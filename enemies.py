@@ -33,17 +33,19 @@ class Zombie(pygame.sprite.Sprite):
         self.time = time.clock() * self.animation_speed
         self.av = 5
         self.time_sin = 0
-        self.animation_rect = 0
+        self.animation_rect = pygame.Rect(self.av, self.av * 2, (self.width - (2 * self.av)), (self.height - self.av))
         self.map_size = map_size
-        self.direction = True  # True is right, False is left
+        self.direction = False  # True is right, False is left
 
     def update(self):
         self.collision_list = []
+        self.time = time.clock() * self.animation_speed
+        self.time_sin = math.sin(self.time)
 
         if self.direction:
-            self.velocity[0] = self.ZOMBIE_MOVE_SPEED
+            self.velocity[0] = self.ZOMBIE_MOVE_SPEED + self.time_sin * 20
         else:
-            self.velocity[0] = -self.ZOMBIE_MOVE_SPEED
+            self.velocity[0] = -self.ZOMBIE_MOVE_SPEED + self.time_sin * 20
 
         self.velocity[1] -= self.dt * self.acceleration
         self.zombie_position[0] += self.dt * self.velocity[0]
@@ -91,8 +93,6 @@ class Zombie(pygame.sprite.Sprite):
     #            self.zombie_tiles[x].append(self.tile_set.subsurface(rect))
 
     def animation(self):
-        self.time = time.clock() * self.animation_speed
-        self.time_sin = math.sin(self.time)
         self.image.fill((255, 255, 255))
         self.animation_rect = pygame.Rect(self.av, self.av * 2, (self.width - (2 * self.av)), (self.height - self.av))
 
@@ -103,6 +103,11 @@ class Zombie(pygame.sprite.Sprite):
         self.animation_rect.h += self.time_sin * self.av
 
         self.image.fill((0, 0, 0), self.animation_rect)
+
+        self.animation_rect.x += self.rect.x
+        self.animation_rect.y += self.rect.y
+
+
 
 
 
