@@ -2,13 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7ca1be91-1626-459e-8758-977d621478d4" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dictionaries/Alastair_Flynn.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/Alastair_Flynn.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/enemies.py" afterPath="$PROJECT_DIR$/enemies.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/map.py" afterPath="$PROJECT_DIR$/map.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/player.py" afterPath="$PROJECT_DIR$/player.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/resources/maps/map1.tmx" afterPath="$PROJECT_DIR$/resources/maps/map1.tmx" />
     </list>
     <ignored path="Platformer.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -58,8 +52,8 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
-              <caret line="145" column="16" selection-start-line="145" selection-start-column="16" selection-end-line="145" selection-end-column="16" />
+            <state relative-caret-position="140">
+              <caret line="131" column="48" selection-start-line="131" selection-start-column="48" selection-end-line="131" selection-end-column="48" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -593,7 +587,14 @@
       <option name="project" value="LOCAL" />
       <updated>1476991534674</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Update 1.10&#10;Added death animations&#10;Added win screen&#10;Added exit button&#10;Fixed a few bugs&#10;Added more to the first level">
+      <created>1477818994621</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1477818994621</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -668,7 +669,8 @@
     <MESSAGE value="Update 1.05&#10;Fixed the bug with that player that caused it to got faster one way that the other, still working on applying it to the enimies module." />
     <MESSAGE value="Update 1.06&#10;Changed the art style of the game to a minimalist black and white theme, this decision was due to difficutly sourceing open source game art to use" />
     <MESSAGE value="Update 1.07&#10;Added animations" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update 1.07&#10;Added animations" />
+    <MESSAGE value="Update 1.10&#10;Added death animations&#10;Added win screen&#10;Added exit button&#10;Fixed a few bugs&#10;Added more to the first level" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update 1.10&#10;Added death animations&#10;Added win screen&#10;Added exit button&#10;Fixed a few bugs&#10;Added more to the first level" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1002,8 +1004,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="145" column="16" selection-start-line="145" selection-start-column="16" selection-end-line="145" selection-end-column="16" />
+        <state relative-caret-position="140">
+          <caret line="131" column="48" selection-start-line="131" selection-start-column="48" selection-end-line="131" selection-end-column="48" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
