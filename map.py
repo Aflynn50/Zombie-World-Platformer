@@ -3,7 +3,9 @@ import sys
 import time
 import os
 import math
+import random
 import enemies
+import player
 from pytmx import *
 from pytmx.util_pygame import load_pygame
 from pygame.locals import *
@@ -17,11 +19,16 @@ class TiledRenderer(object):
     def __init__(self, filename, surface, dt):
         tm = load_pygame(filename)
         self.dt = dt
+        self.FPS = 1 / self.dt
         # self.size will be the pixel size of the map
         # this value is used later to render the entire map to a pygame surface
         self.map_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
         self.tmx_data = tm
+        self.win_animation_counter = 0
+        self.win_animation_group = pygame.sprite.Group()
         # setup level geometry with simple pygame rects, loaded from pytmx
+        self.timer_font = pygame.font.SysFont("haettenschweiler", 25)
+        self.magneto_font = pygame.font.SysFont("magneto", 60)
         self.walls = list()
         self.wall_type = list()
         self.zombies = list()
@@ -61,13 +68,15 @@ class TiledRenderer(object):
         self.spawn_zombies()
         #self.group.add(player)
 
-    def draw(self, surface, player):
+    def draw(self, surface, player, time):
 
         # center the map/screen on our Hero
         self.group.center(player.rect.center)
         # draw the map and all sprites
 
         self.group.draw(surface)
+        "{0:.2f}".format(5)
+        surface.blit(self.timer_font.render("{0:.1f}".format(time), 1, (0, 0, 0)), (20, 15))
 
     def spawn_zombies(self):
         for zombie in self.spawn_points:
@@ -85,6 +94,20 @@ class TiledRenderer(object):
     def add_animation(self, rects):
         for rect in rects:
             self.group.add(rect)
+
+    def win_update(self, surface, score):
+        if self.win_animation_counter % self.FPS == 0:
+            screen_size = surface.get_size()
+            position = random.randint(0, screen_size[0]), random.randint(0, screen_size[1])
+            for block in range(30):
+                self.win_animation_group.add(player.AnimationRect(position, (4, 4), self.dt))
+        self.win_animation_counter += 1
+        surface.blit(self.magneto_font.render("You win", 1, (0, 0, 0)), (100, 30))
+        surface.blit(self.magneto_font.render("Your score is:", 1, (0, 0, 0)), (20, 100))
+        surface.blit(self.magneto_font.render(str(int(score)), 1, (0, 0, 0)), (180, 170))
+        self.win_animation_group.update()
+        self.win_animation_group.draw(surface)
+
 
 class Menu(object):
 

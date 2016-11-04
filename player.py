@@ -36,6 +36,7 @@ class Player(pygame.sprite.Sprite):
         self.left = False
         self.right = False
         self.up = False
+        self.bullet = False
         self.jumping = True
         self.collision = False
         self.collision_list = []
@@ -44,12 +45,11 @@ class Player(pygame.sprite.Sprite):
         self.map_width = map_size[0]
         self.map_height = map_size[1]
 
-        #pygame.key.set_repeat(int(1000 * self.dt), int(1000 * self.dt))
-
     def update(self, keys):
         self.left = False
         self.right = False
         self.up = False
+        self.bullet = False
         self.collision = False
         self.collision_list = []
 
@@ -59,6 +59,8 @@ class Player(pygame.sprite.Sprite):
             self.left = True
         if keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]:
             self.up = True
+        if keys[pygame.K_e] or keys[pygame.K_RSHIFT]:
+            self.bullet = True
 
         if self.right:
             self.velocity[0] = self.PLAYER_MOVE_SPEED
@@ -111,19 +113,20 @@ class Player(pygame.sprite.Sprite):
         if self.rect != self.old_rect:
             self.old_rect.x = self.rect.x
             self.old_rect.y = self.rect.y
-        return "carry on"
+        return False
 
     def death_animation_init_(self):
         for x in range(0, self.width, int(self.width / 4)):
             for y in range(0, self.height, int(self.height / 4)):
                 width = int(self.rect.w / 4)
                 height = int(self.rect.h / 4)
-                self.death_animation_rects.append(AnimationRect((self.rect.x + x, self.rect.y + y), (width, height), self.dt))
+                self.death_animation_rects.append(
+                    AnimationRect((self.rect.x + x, self.rect.y + y), (width, height), self.dt))
         return self.death_animation_rects
 
-    def death_animation_update(self, surface):
+    def death_animation_update(self):
         for rect in self.death_animation_rects:
-            rect.update(surface)
+            rect.update()
 
 
 class AnimationRect(pygame.sprite.Sprite):
@@ -139,7 +142,7 @@ class AnimationRect(pygame.sprite.Sprite):
         self.velocity = list([(75 - random.randint(0, 150)), (random.randint(200, 300) * -1)])
         self.acceleration = -500
 
-    def update(self, surface):
+    def update(self):
         self.velocity[1] -= self.dt * self.acceleration
         self.rect_position[0] += self.dt * self.velocity[0]
         self.rect_position[1] += self.dt * self.velocity[1]
@@ -148,6 +151,32 @@ class AnimationRect(pygame.sprite.Sprite):
         if self.rect.y >= 1000:
             self.kill()
 
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, dt, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.height = 16
+        self.width = 32
+        self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA, 32)
+        points_list = [[0, 0], [0, self.height], [self.width, int(self.height / 2)]]
+        pygame.draw.polygon(self.image, (0, 0, 0), points_list)
+        self.dt = dt
+        self.rect = self.image.get_rect()
+        self.start_pos = pos
+        self.despawn_distance = 300
+        self.bullet_position = list([pos[0], pos[1] + 8])
+        self.rect.x = self.bullet_position[0]
+        self.rect.y = self.bullet_position[1]
+        self.bullet_speed = 500
+        self.velocity = list([self.bullet_speed, 0])
+
+    def update(self):
+        self.bullet_position[0] += self.dt * self.velocity[0]
+        self.bullet_position[1] += self.dt * self.velocity[1]
+        self.rect.x = self.bullet_position[0]
+        self.rect.y = self.bullet_position[1]
+        if self.bullet_position[0] - self.start_pos[0] > self.despawn_distance:
+            self.kill()
 
 
 

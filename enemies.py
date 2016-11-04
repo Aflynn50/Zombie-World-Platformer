@@ -3,6 +3,7 @@ import sys
 import time
 import os
 import math
+import random
 import pytmx
 import collision
 import map
@@ -33,14 +34,18 @@ class Zombie(pygame.sprite.Sprite):
         self.time = time.clock() * self.animation_speed
         self.av = 5
         self.time_sin = 0
+        #self.animation_sync = random.uniform(0, (2 * math.pi))
         self.animation_rect = pygame.Rect(self.av, self.av * 2, (self.width - (2 * self.av)), (self.height - self.av))
+        self.death_animation_rects = list()
+        self.death_animation_group = pygame.sprite.Group()
         self.map_size = map_size
         self.direction = False  # True is right, False is left
+        self.dead = False
 
     def update(self):
         self.collision_list = []
         self.time = time.clock() * self.animation_speed
-        self.time_sin = math.sin(self.time)
+        self.time_sin = math.sin(self.time) #+ self.animation_sync
 
         if self.direction:
             self.velocity[0] = self.ZOMBIE_MOVE_SPEED + self.time_sin * 20
@@ -73,9 +78,14 @@ class Zombie(pygame.sprite.Sprite):
         if self.rect.right >= self.map_size[0]:
             self.zombie_position[0] = self.map_size[0] - self.width
             self.direction = False
+
         if self.rect.x <= 0:
             self.zombie_position[0] = 0
             self.direction = True
+
+        if self.rect.y >= self.map_size[1]:
+            self.dead = True
+            self.death_init()
 
         self.rect.x = self.zombie_position[0]
         self.rect.y = self.zombie_position[1]
@@ -84,13 +94,6 @@ class Zombie(pygame.sprite.Sprite):
             self.old_rect.y = self.rect.y
 
         self.animation()
-
-    #def load_zombie_tileset(self):
-    #    for x in range(0, int(self.tileset_image_size[0] / self.tile_size[0])):
-    #        self.zombie_tiles.append(list([]))
-    #        for y in range(0, int(self.tileset_image_size[1] / self.tile_size[1])):
-    #            rect = pygame.Rect((x * self.tile_size[0]), (y * self.tile_size[1]), self.tile_size[0], self.tile_size[1])
-    #            self.zombie_tiles[x].append(self.tile_set.subsurface(rect))
 
     def animation(self):
         self.image.fill((255, 255, 255))
@@ -107,7 +110,17 @@ class Zombie(pygame.sprite.Sprite):
         self.animation_rect.x += self.rect.x
         self.animation_rect.y += self.rect.y
 
+    def death_init(self):
+        for x in range(0, self.width, int(self.width / 4)):
+            for y in range(0, self.height, int(self.height / 4)):
+                width = int(self.rect.w / 4)
+                height = int(self.rect.h / 4)
+                block = player.AnimationRect((self.rect.x + x, self.rect.y + y), (width, height), self.dt)
+                self.death_animation_rects.append(block)
+                self.death_animation_group.add(block)
 
+    def death_update(self):
+        self.death_animation_group.update()
 
 
 
