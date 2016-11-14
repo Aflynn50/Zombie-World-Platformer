@@ -7,6 +7,7 @@ import math
 import collision
 import map
 import player
+import file_handling
 from pygame.locals import *
 from pygame import gfxdraw
 
@@ -20,9 +21,10 @@ class Game:
         self.dt = 1 / self.FPS  # The time for each frame
         self.screen_size = list([500, 300])
         self.DISPLAYSURF = pygame.display.set_mode(self.screen_size)  # Creates the display surface object
-        pygame.display.set_caption("Zombie World")
-        pygame.display.set_icon(pygame.image.load("resources/sprites/game_icon.png"))
-        self.magneto_font = pygame.font.SysFont("magneto", 80)
+        pygame.display.set_caption("Zombie World")  # Sets window caption
+        pygame.display.set_icon(pygame.image.load("resources/sprites/game_icon.png"))  # Sets window icon (in the bar at the top)
+        self.menu1 = map.Menu(self.DISPLAYSURF)  # Initialises new Menu object
+        self.magneto_font = pygame.font.SysFont("magneto", 80)  # Create new font object
         self.sprites = list()
         self.bullets_group = pygame.sprite.Group()
         self.bullets = list()
@@ -30,10 +32,10 @@ class Game:
         self.timer = time.time()
         self.score = 0
         self.game_over_flag = False
-        self.screen = map.TiledRenderer(os.path.join("resources/maps/map8.tmx"), self.DISPLAYSURF, self.dt)  # Loads the maps from the tmx file
-        self.player1 = player.Player(self.dt, self.screen.player_pos, self.screen.map_size, self.screen.walls, self.screen.wall_type)
+        self.screen = map.TiledRenderer(os.path.join("resources/maps/map8.tmx"), self.DISPLAYSURF, self.dt)  # Loads the maps from the tmx file and initialises the map drawing object
+        self.player1 = player.Player(self.dt, self.screen.player_pos, self.screen.map_size, self.screen.walls, self.screen.wall_type)  # Initialises a new player object
         self.sprites.append(self.player1)
-        self.screen.add_sprites(self.sprites)
+        self.screen.add_sprites(self.sprites)  # Adds the list of sprites to the list of things to be displayed by the renderer
         self.keys = 0
 
     @staticmethod
@@ -46,7 +48,7 @@ class Game:
             if event.type == QUIT:
                 self.terminate()  # terminate if any QUIT events are present
         for event in pygame.event.get(KEYUP):  # Check what keys have been released
-            if event.key == K_ESCAPE or event.key == K_BACKSPACE:
+            if event.key == K_ESCAPE:
                 self.terminate()  # Calls the function to shut down the program
             pygame.event.post(event)  # put the other KEYUP event objects back
 
@@ -57,6 +59,7 @@ class Game:
 
         while True:
             self.check_for_quit()
+            pygame.event.clear()
             self.keys = pygame.key.get_pressed()
             self.game_over_flag = self.player1.update(self.keys)
             self.bullets_group.update()
@@ -67,7 +70,7 @@ class Game:
                 self.win()
                 return True
 
-            if self.player1.bullet and (time.time() - self.last_bullet > 2):
+            if self.player1.bullet and (time.time() - self.last_bullet > 1):
                 bullet = player.Bullet(self.dt, self.player1.player_position)
                 self.bullets.append(bullet)
                 self.screen.group.add(self.bullets[-1])
@@ -104,18 +107,21 @@ class Game:
             self.FPSCLOCK.tick(self.FPS)
 
     def menu(self):
-        menu1 = map.Menu(self.DISPLAYSURF)
+
         while True:
             self.check_for_quit()
             self.keys = pygame.key.get_pressed()
-            menu1.update(self.DISPLAYSURF)
+            self.menu1.update(self.DISPLAYSURF)
             for event in pygame.event.get():
                 if event.type == MOUSEBUTTONUP:
-                    button_clicked = menu1.click(event.pos)
+                    button_clicked = self.menu1.click(event.pos)
                     if button_clicked == "play":
                         return
                     elif button_clicked == "exit":
                         self.terminate()
+                    elif button_clicked == "leader":
+                        self.leader_board()
+                        pass
 
                 elif self.keys[pygame.K_RETURN]:
                     return
@@ -146,21 +152,53 @@ class Game:
         self.score += (1 / self.timer) * 3000
 
         while True:
+            enter_score = False
             self.check_for_quit()
             self.screen.draw(self.DISPLAYSURF, self.player1, self.timer)
+            for event in pygame.event.get(KEYUP):
+                print(pygame.key.name(event.key))
+                if event.key == pygame.K_RETURN:
+                    enter_score = True
 
-            self.keys = pygame.key.get_pressed()
-            if self.keys[pygame.K_RETURN]:
-                return
+            if enter_score:
+                name = ""
+                while True:
+                    self.check_for_quit()
+                    for event in pygame.event.get(KEYUP):
+                        if event.key == pygame.K_RETURN and len(name) > 0:
+                            file_handling.leaderboard_add("resources/leaderboard/leaderboard.txt", name,
+                                                          int(self.score))
+                            return
+                        elif event.key == pygame.K_BACKSPACE:
+                            print("a")
+                            name = name[:(len(name) - 1)]
+                        elif len(name) < 4 and event.key <= 127:
+                            if chr(event.key).isalpha():
+                                name = name + chr(event.key).capitalize()
+
+                    self.screen.enter_score(self.DISPLAYSURF, name)
+                    pygame.display.update()
+                    self.FPSCLOCK.tick(self.FPS)
+
 
             self.screen.win_update(self.DISPLAYSURF, self.score)
             pygame.display.update()
             self.FPSCLOCK.tick(self.FPS)
 
+    def leader_board(self):
+        leaderboard = file_handling.leaderboard_read("resources/leaderboard/leaderboard.txt")
+        while True:
+            self.check_for_quit()
+            self.menu1.display_leaderboard(self.DISPLAYSURF, leaderboard)
+            self.keys = pygame.key.get_pressed()
+            if self.keys[pygame.K_BACKSPACE]:
+                return
+            pygame.display.update()
+            self.FPSCLOCK.tick(self.FPS)
 
-newgame = Game()
-gameOver = newgame.run()
+
+newgame = Game()  # Initialises the game object
+gameOver = newgame.run()  # Runs game
 while True:
-    if gameOver:
-        newgame = Game()
-        gameOver = newgame.run()
+    newgame = Game()
+    gameOver = newgame.run()

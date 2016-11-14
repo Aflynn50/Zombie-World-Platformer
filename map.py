@@ -108,6 +108,15 @@ class TiledRenderer(object):
         self.win_animation_group.update()
         self.win_animation_group.draw(surface)
 
+    def enter_score(self, surface, name):
+        surface.fill((255, 255, 255))
+        surface.blit(self.magneto_font.render("Enter your", 1, (0, 0, 0)), (70, 10))
+        surface.blit(self.magneto_font.render("name", 1, (0, 0, 0)), (170, 100))
+        pygame.draw.rect(surface, (0, 0, 0), (68, 180, self.magneto_font.size("AAAAA")[0], self.magneto_font.size("AAAAA")[1]), 2)
+        surface.blit(self.magneto_font.render(name, 1, (0, 0, 0)), (70, 180))
+
+
+
 
 class Menu(object):
 
@@ -118,22 +127,36 @@ class Menu(object):
         self.title_font = pygame.font.SysFont("magneto", 40)
         self.play_button = pygame.Surface([self.screen_size[0], 50])
         self.exit_button = pygame.Surface([self.screen_size[0], 50])
+        self.leader_button = pygame.Surface([self.screen_size[0], 50])
+        self.settings_button = pygame.Surface([self.screen_size[0], 50])
         self.play_button.fill((0, 0, 0))
         self.exit_button.fill((0, 0, 0))
+        self.leader_button.fill((0, 0, 0))
+        self.settings_button.fill((0, 0, 0))
         self.play_button.blit(self.button_font.render("Play", 1, (255, 255, 255)), (20, 15))
         self.exit_button.blit(self.button_font.render("Exit", 1, (255, 255, 255)), (20, 15))
+        self.leader_button.blit(self.button_font.render("Leaderboard", 1, (255, 255, 255)), (20, 15))
+        self.settings_button.blit(self.button_font.render("Settings", 1, (255, 255, 255)), (20, 15))
         self.title = self.title_font.render("Zombie world", 1, (0, 0, 0))
         self.play_rect = self.play_button.get_rect()
         self.exit_rect = self.exit_button.get_rect()
+        self.leader_rect = self.leader_button.get_rect()
+        self.settings_rect = self.settings_button.get_rect()
         self.play_rect.x = 0
-        self.play_rect.y = 75
+        self.play_rect.y = 50
+        self.leader_rect.x = 0
+        self.leader_rect.y = 115
+        self.settings_rect.x = 0
+        self.settings_rect.y = 180
         self.exit_rect.x = 0
-        self.exit_rect.y = 150
+        self.exit_rect.y = 245
 
     def update(self, surface):
         surface.fill((255, 255, 255))
-        surface.blit(self.play_button, (0, 75))
-        surface.blit(self.exit_button, (0, 150))
+        surface.blit(self.play_button, (0, 50))
+        surface.blit(self.exit_button, (0, 245))
+        surface.blit(self.leader_button, (0, 115))
+        surface.blit(self.settings_button, (0, 180))
         surface.blit(self.title, (100, 0))
 
     def click(self, position):
@@ -141,7 +164,23 @@ class Menu(object):
             return "play"
         elif self.exit_rect.collidepoint(position):
             return "exit"
+        elif self.leader_rect.collidepoint(position):
+            return "leader"
+        elif self.settings_rect.collidepoint(position):
+            return "settings"
         return False
+
+    def display_leaderboard(self, surface, leaderboard):
+        surface.fill((255, 255, 255))
+        surface.blit(self.leader_button, (0, 0))
+        for position in range(5):
+            try:
+                surface.blit(self.button_font.render(leaderboard[position], 1, (0, 0, 0)), (25, (80 + (position * 40))))
+            except IndexError:
+                pass
+
+
+
 
 
 

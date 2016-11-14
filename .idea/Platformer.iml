@@ -6,8 +6,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Misc" />
     <orderEntry type="module" module-name="duck-game-master" />
-    <orderEntry type="module" module-name="pyscroll-master" />
-    <orderEntry type="module" module-name="Project Euler" />
     <orderEntry type="module" module-name="Wario-Land-3-master" />
+    <orderEntry type="module" module-name="School work" />
   </component>
 </module>
