@@ -18,6 +18,15 @@ def leaderboard_read(path):
         return board
 
 
+def leaderboard_check(path):
+    board = list()
+    with open(path, 'r') as leaders:
+        for line in leaders:
+            board.append(int(line[(line.index(":") + 1):].strip("\n")))
+        leaders.close()
+        return board
+
+
 def leaderboard_add(path, name, score):
     text_dict = {}
     text = []

@@ -170,12 +170,12 @@ class Menu(object):
             return "settings"
         return False
 
-    def display_leaderboard(self, surface, leaderboard):
+    def display_leaderboard(self, surface, leaderboard, scroll_position):
         surface.fill((255, 255, 255))
         surface.blit(self.leader_button, (0, 0))
         for position in range(5):
             try:
-                surface.blit(self.button_font.render(leaderboard[position], 1, (0, 0, 0)), (25, (80 + (position * 40))))
+                surface.blit(self.button_font.render(leaderboard[position + scroll_position], 1, (0, 0, 0)), (25, (80 + (position * 40))))
             except IndexError:
                 pass
 

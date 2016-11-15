@@ -20,9 +20,12 @@ class Game:
         self.FPS = 60
         self.dt = 1 / self.FPS  # The time for each frame
         self.screen_size = list([500, 300])
+        self.fp_leaderboard = "resources/leaderboard/leaderboard.txt"
+        self.fp_icon = "resources/sprites/game_icon.png"
+        self.fp_map = "resources/maps/map8.tmx"
         self.DISPLAYSURF = pygame.display.set_mode(self.screen_size)  # Creates the display surface object
         pygame.display.set_caption("Zombie World")  # Sets window caption
-        pygame.display.set_icon(pygame.image.load("resources/sprites/game_icon.png"))  # Sets window icon (in the bar at the top)
+        pygame.display.set_icon(pygame.image.load(self.fp_icon))  # Sets window icon (in the bar at the top)
         self.menu1 = map.Menu(self.DISPLAYSURF)  # Initialises new Menu object
         self.magneto_font = pygame.font.SysFont("magneto", 80)  # Create new font object
         self.sprites = list()
@@ -32,7 +35,7 @@ class Game:
         self.timer = time.time()
         self.score = 0
         self.game_over_flag = False
-        self.screen = map.TiledRenderer(os.path.join("resources/maps/map8.tmx"), self.DISPLAYSURF, self.dt)  # Loads the maps from the tmx file and initialises the map drawing object
+        self.screen = map.TiledRenderer(os.path.join(self.fp_map), self.DISPLAYSURF, self.dt)  # Loads the maps from the tmx file and initialises the map drawing object
         self.player1 = player.Player(self.dt, self.screen.player_pos, self.screen.map_size, self.screen.walls, self.screen.wall_type)  # Initialises a new player object
         self.sprites.append(self.player1)
         self.screen.add_sprites(self.sprites)  # Adds the list of sprites to the list of things to be displayed by the renderer
@@ -70,7 +73,7 @@ class Game:
                 self.win()
                 return True
 
-            if self.player1.bullet and (time.time() - self.last_bullet > 1):
+            if self.player1.bullet and (time.time() - self.last_bullet > 0.1):
                 bullet = player.Bullet(self.dt, self.player1.player_position)
                 self.bullets.append(bullet)
                 self.screen.group.add(self.bullets[-1])
@@ -156,9 +159,14 @@ class Game:
             self.check_for_quit()
             self.screen.draw(self.DISPLAYSURF, self.player1, self.timer)
             for event in pygame.event.get(KEYUP):
-                print(pygame.key.name(event.key))
                 if event.key == pygame.K_RETURN:
-                    enter_score = True
+                    try:
+                        if file_handling.leaderboard_check(self.fp_leaderboard)[10] < self.score:
+                            enter_score = True
+                        else:
+                            return
+                    except IndexError:
+                        enter_score = True
 
             if enter_score:
                 name = ""
@@ -166,7 +174,7 @@ class Game:
                     self.check_for_quit()
                     for event in pygame.event.get(KEYUP):
                         if event.key == pygame.K_RETURN and len(name) > 0:
-                            file_handling.leaderboard_add("resources/leaderboard/leaderboard.txt", name,
+                            file_handling.leaderboard_add(self.fp_leaderboard, name,
                                                           int(self.score))
                             return
                         elif event.key == pygame.K_BACKSPACE:
@@ -174,7 +182,7 @@ class Game:
                             name = name[:(len(name) - 1)]
                         elif len(name) < 4 and event.key <= 127:
                             if chr(event.key).isalpha():
-                                name = name + chr(event.key).capitalize()
+                                name += chr(event.key).capitalize()
 
                     self.screen.enter_score(self.DISPLAYSURF, name)
                     pygame.display.update()
@@ -186,10 +194,17 @@ class Game:
             self.FPSCLOCK.tick(self.FPS)
 
     def leader_board(self):
-        leaderboard = file_handling.leaderboard_read("resources/leaderboard/leaderboard.txt")
+        leaderboard = file_handling.leaderboard_read(self.fp_leaderboard)
+        scroll_position = 0
         while True:
             self.check_for_quit()
-            self.menu1.display_leaderboard(self.DISPLAYSURF, leaderboard)
+            self.menu1.display_leaderboard(self.DISPLAYSURF, leaderboard, scroll_position)
+            for event in pygame.event.get(KEYUP):
+                if (event.key == pygame.K_UP or event.key == pygame.K_w) and scroll_position > 0:
+                    scroll_position -= 1
+                elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and scroll_position < (len(leaderboard) - 1):
+                    scroll_position += 1
+
             self.keys = pygame.key.get_pressed()
             if self.keys[pygame.K_BACKSPACE]:
                 return
