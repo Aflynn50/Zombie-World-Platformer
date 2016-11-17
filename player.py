@@ -9,10 +9,11 @@ from pygame.locals import *
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, dt, pos, map_size, walls, wall_type):
+    def __init__(self, dt, pos, map_size, walls, wall_type, dict_keys):
         pygame.sprite.Sprite.__init__(self)
         #self.image = pygame.image.load(os.path.join("resources/sprites/player.png"))
         self.dt = dt
+        self.dict_keys = dict_keys
         self.width = 32
         self.height = 32
         self.image = pygame.Surface([self.width, self.height], pygame.SRCALPHA, 32)
@@ -53,13 +54,13 @@ class Player(pygame.sprite.Sprite):
         self.collision = False
         self.collision_list = []
 
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        if keys[self.dict_keys["RIGHT"]]:
             self.right = True
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if keys[self.dict_keys["LEFT"]]:
             self.left = True
-        if keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]:
+        if keys[self.dict_keys["UP"]]:
             self.up = True
-        if keys[pygame.K_e] or keys[pygame.K_RSHIFT]:
+        if keys[self.dict_keys["SHOOT"]]:
             self.bullet = True
 
         if self.right:
@@ -163,7 +164,7 @@ class Bullet(pygame.sprite.Sprite):
         self.dt = dt
         self.rect = self.image.get_rect()
         self.start_pos = pos
-        self.despawn_distance = 300
+        self.despawn_distance = 500
         self.bullet_position = list([pos[0], pos[1] + 8])
         self.rect.x = self.bullet_position[0]
         self.rect.y = self.bullet_position[1]

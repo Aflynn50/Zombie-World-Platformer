@@ -20,9 +20,12 @@ class Game:
         self.FPS = 60
         self.dt = 1 / self.FPS  # The time for each frame
         self.screen_size = list([500, 300])
-        self.fp_leaderboard = "resources/leaderboard/leaderboard.txt"
-        self.fp_icon = "resources/sprites/game_icon.png"
-        self.fp_map = "resources/maps/map8.tmx"
+        self.fp_leaderboard = os.path.join("resources/leaderboard/leaderboard.txt")
+        self.fp_icon = os.path.join("resources/sprites/game_icon.png")
+        self.fp_map = os.path.join("resources/maps/map8.tmx")
+        self.fp_key_bindings = os.path.join("resources/settings/key_bindings.txt")
+        self.dict_keys = {"UP": pygame.K_UP, "DOWN": pygame.K_DOWN, "LEFT": pygame.K_LEFT, "RIGHT": pygame.K_RIGHT, "SHOOT": pygame.K_SPACE, "ENTER": pygame.K_RETURN, "BACKSPACE": pygame.K_BACKSPACE}
+        self.dict_keys = file_handling.key_bindings_read(self.fp_key_bindings, self.dict_keys)
         self.DISPLAYSURF = pygame.display.set_mode(self.screen_size)  # Creates the display surface object
         pygame.display.set_caption("Zombie World")  # Sets window caption
         pygame.display.set_icon(pygame.image.load(self.fp_icon))  # Sets window icon (in the bar at the top)
@@ -35,11 +38,12 @@ class Game:
         self.timer = time.time()
         self.score = 0
         self.game_over_flag = False
-        self.screen = map.TiledRenderer(os.path.join(self.fp_map), self.DISPLAYSURF, self.dt)  # Loads the maps from the tmx file and initialises the map drawing object
-        self.player1 = player.Player(self.dt, self.screen.player_pos, self.screen.map_size, self.screen.walls, self.screen.wall_type)  # Initialises a new player object
+        self.screen = map.TiledRenderer(self.fp_map, self.DISPLAYSURF, self.dt)  # Loads the maps from the tmx file and initialises the map drawing object
+        self.player1 = player.Player(self.dt, self.screen.player_pos, self.screen.map_size, self.screen.walls, self.screen.wall_type, self.dict_keys)  # Initialises a new player object
         self.sprites.append(self.player1)
         self.screen.add_sprites(self.sprites)  # Adds the list of sprites to the list of things to be displayed by the renderer
         self.keys = 0
+
 
     @staticmethod
     def terminate():  # Shuts down the pygame module and the sys module and
@@ -73,7 +77,7 @@ class Game:
                 self.win()
                 return True
 
-            if self.player1.bullet and (time.time() - self.last_bullet > 0.1):
+            if self.player1.bullet and (time.time() - self.last_bullet > 1):
                 bullet = player.Bullet(self.dt, self.player1.player_position)
                 self.bullets.append(bullet)
                 self.screen.group.add(self.bullets[-1])
@@ -126,7 +130,7 @@ class Game:
                         self.leader_board()
                         pass
 
-                elif self.keys[pygame.K_RETURN]:
+                elif self.keys[self.dict_keys["ENTER"]]:
                     return
             pygame.display.update()  # Transfers the display surface to the monitor
             self.FPSCLOCK.tick(self.FPS)
@@ -143,7 +147,7 @@ class Game:
 
             self.keys = pygame.key.get_pressed()
             #for event in pygame.event.get():
-            if self.keys[pygame.K_RETURN]:
+            if self.keys[self.dict_keys["ENTER"]]:
                 return
 
             pygame.display.update()  # Transfers the display surface to the monitor
@@ -159,7 +163,7 @@ class Game:
             self.check_for_quit()
             self.screen.draw(self.DISPLAYSURF, self.player1, self.timer)
             for event in pygame.event.get(KEYUP):
-                if event.key == pygame.K_RETURN:
+                if event.key == self.dict_keys["ENTER"]:
                     try:
                         if file_handling.leaderboard_check(self.fp_leaderboard)[10] < self.score:
                             enter_score = True
@@ -173,11 +177,11 @@ class Game:
                 while True:
                     self.check_for_quit()
                     for event in pygame.event.get(KEYUP):
-                        if event.key == pygame.K_RETURN and len(name) > 0:
+                        if event.key == self.dict_keys["ENTER"] and len(name) > 0:
                             file_handling.leaderboard_add(self.fp_leaderboard, name,
                                                           int(self.score))
                             return
-                        elif event.key == pygame.K_BACKSPACE:
+                        elif event.key == self.dict_keys["BACKSPACE"]:
                             print("a")
                             name = name[:(len(name) - 1)]
                         elif len(name) < 4 and event.key <= 127:
@@ -187,7 +191,6 @@ class Game:
                     self.screen.enter_score(self.DISPLAYSURF, name)
                     pygame.display.update()
                     self.FPSCLOCK.tick(self.FPS)
-
 
             self.screen.win_update(self.DISPLAYSURF, self.score)
             pygame.display.update()
@@ -200,13 +203,13 @@ class Game:
             self.check_for_quit()
             self.menu1.display_leaderboard(self.DISPLAYSURF, leaderboard, scroll_position)
             for event in pygame.event.get(KEYUP):
-                if (event.key == pygame.K_UP or event.key == pygame.K_w) and scroll_position > 0:
+                if (event.key == self.dict_keys["UP"] or event.key == self.dict_keys["W"]) and scroll_position > 0:
                     scroll_position -= 1
-                elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and scroll_position < (len(leaderboard) - 1):
+                elif (event.key == self.dict_keys["DOWN"] or event.key == self.dict_keys["S"]) and scroll_position < (len(leaderboard) - 1):
                     scroll_position += 1
 
             self.keys = pygame.key.get_pressed()
-            if self.keys[pygame.K_BACKSPACE]:
+            if self.keys[self.dict_keys["BACKSPACE"]]:
                 return
             pygame.display.update()
             self.FPSCLOCK.tick(self.FPS)

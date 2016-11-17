@@ -179,12 +179,3 @@ class Menu(object):
             except IndexError:
                 pass
 
-
-
-
-
-
-
-
-
-
