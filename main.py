@@ -24,6 +24,8 @@ class Game:
         self.fp_icon = os.path.join("resources/sprites/game_icon.png")
         self.fp_map = os.path.join("resources/maps/map8.tmx")
         self.fp_key_bindings = os.path.join("resources/settings/key_bindings.txt")
+        self.fp_music_main_theme = os.path.join("resources/sounds/foolboymedia_main_theme.wav")
+        self.fp_music_menu = os.path.join("resources/sounds/foolboymedia_menu.wav")
         self.dict_keys = {"UP": pygame.K_UP, "DOWN": pygame.K_DOWN, "LEFT": pygame.K_LEFT, "RIGHT": pygame.K_RIGHT, "SHOOT": pygame.K_SPACE, "ENTER": pygame.K_RETURN, "BACKSPACE": pygame.K_BACKSPACE}
         self.dict_keys = file_handling.key_bindings_read(self.fp_key_bindings, self.dict_keys)
         self.DISPLAYSURF = pygame.display.set_mode(self.screen_size)  # Creates the display surface object
@@ -43,6 +45,11 @@ class Game:
         self.sprites.append(self.player1)
         self.screen.add_sprites(self.sprites)  # Adds the list of sprites to the list of things to be displayed by the renderer
         self.keys = 0
+        pygame.mixer.init()
+        self.music_main_theme = pygame.mixer.Sound(self.fp_music_main_theme)
+        self.music_menu = pygame.mixer.Sound(self.fp_music_menu)
+        self.music_menu.set_volume(0.5)
+        self.music_on = True
 
 
     @staticmethod
@@ -63,6 +70,8 @@ class Game:
         self.FPSCLOCK = pygame.time.Clock()  # Starts the FPS counter
         self.menu()
         self.timer = time.time()
+        if self.music_on:
+            self.music_main_theme.play(-1)
 
         while True:
             self.check_for_quit()
@@ -71,13 +80,15 @@ class Game:
             self.game_over_flag = self.player1.update(self.keys)
             self.bullets_group.update()
             if self.game_over_flag == "lose":
+                self.music_main_theme.fadeout(500)
                 self.game_over()
                 return True
             elif self.game_over_flag == "win":
+                self.music_main_theme.fadeout(500)
                 self.win()
                 return True
 
-            if self.player1.bullet and (time.time() - self.last_bullet > 1):
+            if self.player1.bullet and (time.time() - self.last_bullet > 0.2):
                 bullet = player.Bullet(self.dt, self.player1.player_position)
                 self.bullets.append(bullet)
                 self.screen.group.add(self.bullets[-1])
@@ -99,6 +110,7 @@ class Game:
                             self.score += 100
 
                     if self.player1.rect.colliderect(zombie.animation_rect):
+                        self.music_main_theme.fadeout(500)
                         self.game_over()
                         return True
 
@@ -114,7 +126,8 @@ class Game:
             self.FPSCLOCK.tick(self.FPS)
 
     def menu(self):
-
+        if self.music_on:
+            self.music_menu.play(-1)
         while True:
             self.check_for_quit()
             self.keys = pygame.key.get_pressed()
@@ -122,15 +135,18 @@ class Game:
             for event in pygame.event.get():
                 if event.type == MOUSEBUTTONUP:
                     button_clicked = self.menu1.click(event.pos)
-                    if button_clicked == "play":
+                    if button_clicked == "Play":
+                        self.music_menu.fadeout(500)
                         return
-                    elif button_clicked == "exit":
+                    elif button_clicked == "Exit":
                         self.terminate()
-                    elif button_clicked == "leader":
+                    elif button_clicked == "Leaderboard":
                         self.leader_board()
-                        pass
+                    elif button_clicked == "Settings":
+                        self.settings()
 
                 elif self.keys[self.dict_keys["ENTER"]]:
+                    self.music_menu.fadeout(500)
                     return
             pygame.display.update()  # Transfers the display surface to the monitor
             self.FPSCLOCK.tick(self.FPS)
@@ -166,33 +182,31 @@ class Game:
                 if event.key == self.dict_keys["ENTER"]:
                     try:
                         if file_handling.leaderboard_check(self.fp_leaderboard)[10] < self.score:
-                            enter_score = True
-                        else:
-                            return
+                            self.leader_board_entry()
                     except IndexError:
-                        enter_score = True
-
-            if enter_score:
-                name = ""
-                while True:
-                    self.check_for_quit()
-                    for event in pygame.event.get(KEYUP):
-                        if event.key == self.dict_keys["ENTER"] and len(name) > 0:
-                            file_handling.leaderboard_add(self.fp_leaderboard, name,
-                                                          int(self.score))
-                            return
-                        elif event.key == self.dict_keys["BACKSPACE"]:
-                            print("a")
-                            name = name[:(len(name) - 1)]
-                        elif len(name) < 4 and event.key <= 127:
-                            if chr(event.key).isalpha():
-                                name += chr(event.key).capitalize()
-
-                    self.screen.enter_score(self.DISPLAYSURF, name)
-                    pygame.display.update()
-                    self.FPSCLOCK.tick(self.FPS)
+                        self.leader_board_entry()
+                    return
 
             self.screen.win_update(self.DISPLAYSURF, self.score)
+            pygame.display.update()
+            self.FPSCLOCK.tick(self.FPS)
+
+    def leader_board_entry(self):
+        name = ""
+        while True:
+            self.check_for_quit()
+            for event in pygame.event.get(KEYUP):
+                if event.key == self.dict_keys["ENTER"] and len(name) > 0:
+                    file_handling.leaderboard_add(self.fp_leaderboard, name, int(self.score))
+                    return
+                elif event.key == self.dict_keys["BACKSPACE"]:
+                    print("a")
+                    name = name[:(len(name) - 1)]
+                elif len(name) < 4 and event.key <= 127:
+                    if chr(event.key).isalpha():
+                        name += chr(event.key).capitalize()
+
+            self.screen.enter_score(self.DISPLAYSURF, name)
             pygame.display.update()
             self.FPSCLOCK.tick(self.FPS)
 
@@ -203,14 +217,31 @@ class Game:
             self.check_for_quit()
             self.menu1.display_leaderboard(self.DISPLAYSURF, leaderboard, scroll_position)
             for event in pygame.event.get(KEYUP):
-                if (event.key == self.dict_keys["UP"] or event.key == self.dict_keys["W"]) and scroll_position > 0:
+                if (event.key == self.dict_keys["UP"]) and scroll_position > 0:
                     scroll_position -= 1
-                elif (event.key == self.dict_keys["DOWN"] or event.key == self.dict_keys["S"]) and scroll_position < (len(leaderboard) - 1):
+                elif (event.key == self.dict_keys["DOWN"]) and scroll_position < (len(leaderboard) - 1):
                     scroll_position += 1
 
             self.keys = pygame.key.get_pressed()
             if self.keys[self.dict_keys["BACKSPACE"]]:
                 return
+            pygame.display.update()
+            self.FPSCLOCK.tick(self.FPS)
+
+    def settings(self):
+        switches = list()
+        switches.append(map.Switch([200, 150], self.dt))
+        while True:
+            mouse_pos = (0, 0)
+            self.check_for_quit()
+            for event in pygame.event.get(MOUSEBUTTONUP):
+                mouse_pos = event.pos
+
+            self.menu1.display_settings(self.DISPLAYSURF, switches, mouse_pos)
+            self.keys = pygame.key.get_pressed()
+            if self.keys[self.dict_keys["BACKSPACE"]]:
+                return
+
             pygame.display.update()
             self.FPSCLOCK.tick(self.FPS)
 

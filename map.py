@@ -75,8 +75,8 @@ class TiledRenderer(object):
         # draw the map and all sprites
 
         self.group.draw(surface)
-        "{0:.2f}".format(5)
-        surface.blit(self.timer_font.render("{0:.1f}".format(time), 1, (0, 0, 0)), (20, 15))
+        #"{0:.2f}".format(5)
+        surface.blit(self.timer_font.render("{0:.2f}".format(time), 1, (0, 0, 0)), (20, 15))
 
     def spawn_zombies(self):
         for zombie in self.spawn_points:
@@ -125,57 +125,106 @@ class Menu(object):
         self.screen_size = surface.get_size()
         self.button_font = pygame.font.SysFont("magneto", 25)
         self.title_font = pygame.font.SysFont("magneto", 40)
-        self.play_button = pygame.Surface([self.screen_size[0], 50])
-        self.exit_button = pygame.Surface([self.screen_size[0], 50])
-        self.leader_button = pygame.Surface([self.screen_size[0], 50])
-        self.settings_button = pygame.Surface([self.screen_size[0], 50])
-        self.play_button.fill((0, 0, 0))
-        self.exit_button.fill((0, 0, 0))
-        self.leader_button.fill((0, 0, 0))
-        self.settings_button.fill((0, 0, 0))
-        self.play_button.blit(self.button_font.render("Play", 1, (255, 255, 255)), (20, 15))
-        self.exit_button.blit(self.button_font.render("Exit", 1, (255, 255, 255)), (20, 15))
-        self.leader_button.blit(self.button_font.render("Leaderboard", 1, (255, 255, 255)), (20, 15))
-        self.settings_button.blit(self.button_font.render("Settings", 1, (255, 255, 255)), (20, 15))
         self.title = self.title_font.render("Zombie world", 1, (0, 0, 0))
-        self.play_rect = self.play_button.get_rect()
-        self.exit_rect = self.exit_button.get_rect()
-        self.leader_rect = self.leader_button.get_rect()
-        self.settings_rect = self.settings_button.get_rect()
-        self.play_rect.x = 0
-        self.play_rect.y = 50
-        self.leader_rect.x = 0
-        self.leader_rect.y = 115
-        self.settings_rect.x = 0
-        self.settings_rect.y = 180
-        self.exit_rect.x = 0
-        self.exit_rect.y = 245
+        self.buttons = list()
+        self.buttons.append(Button("Play", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 50]))
+        self.buttons.append(Button("Leaderboard", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 115]))
+        self.buttons.append(Button("Settings", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 180]))
+        self.buttons.append(Button("Exit", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 245]))
 
     def update(self, surface):
         surface.fill((255, 255, 255))
-        surface.blit(self.play_button, (0, 50))
-        surface.blit(self.exit_button, (0, 245))
-        surface.blit(self.leader_button, (0, 115))
-        surface.blit(self.settings_button, (0, 180))
         surface.blit(self.title, (100, 0))
+        for button in self.buttons:
+            surface.blit(button.image, (button.screen_pos[0], button.screen_pos[1]))
 
     def click(self, position):
-        if self.play_rect.collidepoint(position):
-            return "play"
-        elif self.exit_rect.collidepoint(position):
-            return "exit"
-        elif self.leader_rect.collidepoint(position):
-            return "leader"
-        elif self.settings_rect.collidepoint(position):
-            return "settings"
+        for button in self.buttons:
+            if button.click(position):
+                return button.text
         return False
 
     def display_leaderboard(self, surface, leaderboard, scroll_position):
         surface.fill((255, 255, 255))
-        surface.blit(self.leader_button, (0, 0))
+        surface.blit(self.buttons[1].image, (0, 0))
         for position in range(5):
             try:
                 surface.blit(self.button_font.render(leaderboard[position + scroll_position], 1, (0, 0, 0)), (25, (80 + (position * 40))))
             except IndexError:
                 pass
+
+    def display_settings(self, surface, switches, mouse_pos):
+        surface.fill((255, 255, 255))
+        surface.blit(self.buttons[2].image, (0, 0))
+
+        for switch in switches:
+            switch.update(mouse_pos)
+            switch.draw(surface)
+
+
+class Button(object):
+    def __init__(self, text, text_pos, font, size, colour, screen_pos):
+        self.screen_pos = screen_pos
+        self.text = text
+        self.image = pygame.Surface(size)
+        self.image.fill(colour)
+        if colour == (0, 0, 0):
+            self.text_colour = (255, 255, 255)
+        else:
+            self.text_colour = (0, 0, 0)
+        self.image.blit(font.render(text, 1, self.text_colour), (text_pos[0], text_pos[1]))
+        self.rect = self.image.get_rect()
+        self.rect.x = screen_pos[0]
+        self.rect.y = screen_pos[1]
+
+    def click(self, pos):
+        if self.rect.collidepoint(pos):
+            return True
+        return False
+
+
+class Switch(object):
+    def __init__(self, position, dt):
+        self.dt = dt
+        self.back_position = [position[0], position[1]]
+        self.front_position = [position[0], position[1]]
+        self.collision_rect = pygame.Rect(position, (80, 30))
+        self.back = pygame.Surface([80, 30])
+        self.back.fill((255, 255, 255))
+        pygame.draw.rect(self.back, (0, 0, 0), ((0, 0), (self.back.get_size())), 5)
+        self.front = pygame.Surface([30, 30])
+        self.front.fill((0, 0, 0))
+        self.back_rect = self.back.get_rect()
+        self.front_rect = self.front.get_rect()
+        self.moving = False
+        self.direction = True  # True is right, False is left
+        self.velocity = 0
+        self.acceleration = 300
+
+    def draw(self, surface):
+        surface.blit(self.back, self.back_position)
+        surface.blit(self.front, self.front_position)
+
+    def update(self, mouse_pos):
+        if self.moving:
+            self.velocity += self.acceleration * self.dt
+            self.front_position[0] += self.velocity * self.dt
+            if self.front_position[0] >= (self.back_position[0] + 50):
+                self.front_position[0] = self.back_position[0] + 50
+                self.moving = False
+                self.acceleration *= -1
+                self.direction = not self.direction
+                self.velocity = 0
+            if self.front_position[0] <= (self.back_position[0]):
+                self.front_position[0] = self.back_position[0]
+                self.moving = False
+                self.acceleration *= -1
+                self.direction = not self.direction
+                self.velocity = 0
+        elif self.collision_rect.collidepoint(mouse_pos):
+            self.moving = True
+
+    def check_state(self):
+        return not self.direction
+
 
