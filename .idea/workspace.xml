@@ -647,7 +647,14 @@
       <option name="project" value="LOCAL" />
       <updated>1479587110572</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Update 1.16&#10;I have started work on the settings module and set some new high scores">
+      <created>1479587519833</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1479587519833</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TestHistory">
