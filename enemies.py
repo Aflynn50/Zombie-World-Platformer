@@ -9,6 +9,7 @@ import collision
 import map
 import player
 from pygame.locals import *
+from pygame import gfxdraw
 
 
 class Zombie(pygame.sprite.Sprite):
@@ -121,6 +122,52 @@ class Zombie(pygame.sprite.Sprite):
 
     def death_update(self):
         self.death_animation_group.update()
+
+
+class Coin(pygame.sprite.Sprite):
+
+    def __init__(self, position, dt):
+        pygame.sprite.Sprite.__init__(self)
+        self.dt = dt
+        self.coin_position = position
+        self.width = 16
+        self.height = 16
+        self.animation_speed = 5
+        self.av = 5
+        self.time = time.clock() * self.animation_speed
+        self.time_sin = math.sin(self.time)
+        self.image = pygame.Surface([self.width, self.height])
+        self.rect = self.image.get_rect()
+        self.rect.x = self.coin_position[0]
+        self.rect.y = self.coin_position[1]
+        self.image.fill((0, 0, 0))
+        self.animation_rect = pygame.Rect(self.av, self.av, self.width - 2 * self.av, self.height - 2 * self.av)
+        self.animation_speed = 5
+        self.image.fill((255, 255, 255))
+        self.rect_x = self.animation_rect.x
+        self.rect_y = self.animation_rect.y
+        self.rect_width = self.animation_rect.width
+        self.rect_height = self.animation_rect.height
+
+    def update(self):
+        self.image.fill((0, 0, 0))
+        self.time = time.clock() * self.animation_speed
+        self.time_sin = math.sin(self.time)
+        self.rect_x = self.av - ((self.time_sin * self.av) / 2)
+        self.rect_y = self.av - ((self.time_sin * self.av) / 2)
+        self.animation_rect.x = round(self.rect_x)
+        self.animation_rect.y = round(self.rect_y)
+        self.rect_width = self.width - (self.animation_rect.x * 2)
+        self.rect_height = self.height - (self.animation_rect.y * 2)
+        #self.rect_height = (self.height / 2) + (self.time_sin * self.av)
+        self.animation_rect.width = round(self.rect_width)
+        self.animation_rect.height = round(self.rect_height)
+        pygame.draw.rect(self.image, (255, 255, 255), self.animation_rect)
+
+
+
+
+
 
 
 

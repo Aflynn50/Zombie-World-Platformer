@@ -156,8 +156,8 @@ class AnimationRect(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, dt, pos):
         pygame.sprite.Sprite.__init__(self)
-        self.height = 16
-        self.width = 32
+        self.height = 12
+        self.width = 24
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA, 32)
         points_list = [[0, 0], [0, self.height], [self.width, int(self.height / 2)]]
         pygame.draw.polygon(self.image, (0, 0, 0), points_list)

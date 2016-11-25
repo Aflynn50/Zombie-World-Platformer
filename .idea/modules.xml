@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../Misc/.idea/Misc.iml" filepath="$PROJECT_DIR$/../Misc/.idea/Misc.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Platformer.iml" filepath="$PROJECT_DIR$/.idea/Platformer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../School work/.idea/School work.iml" filepath="$PROJECT_DIR$/../School work/.idea/School work.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../Example platformers/Wario-Land-3-master/.idea/Wario-Land-3-master.iml" filepath="$PROJECT_DIR$/../../Example platformers/Wario-Land-3-master/.idea/Wario-Land-3-master.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../Example platformers/duck-game-master/.idea/duck-game-master.iml" filepath="$PROJECT_DIR$/../../Example platformers/duck-game-master/.idea/duck-game-master.iml" />
+      <module fileurl="file://$USER_HOME$/Downloads/pywonderland-master/.idea/pywonderland-master.iml" filepath="$USER_HOME$/Downloads/pywonderland-master/.idea/pywonderland-master.iml" />
     </modules>
   </component>
 </project>
