@@ -47,13 +47,32 @@ def leaderboard_add(path, name, score):
 
 
 def key_bindings_read(path, default_bindings):
-    with open(path, 'r') as settings:
-        for line in settings:
+    with open(path, 'r') as key_bindings:
+        for line in key_bindings:
             if str(line[:line.index(":")]) in default_bindings:
                 default_bindings[(str(line[:line.index(":")]))] = int(line[(line.index(":") + 1):].strip("\n"))
-        settings.close()
+        key_bindings.close()
         return default_bindings
 
 
+def settings_read(path):
+    dict_settings = dict()
+    with open(path, 'r') as settings:
+        for line in settings:
+            try:
+                dict_settings[str(line[:line.index(":")])] = line[(line.index(":") + 1):].strip("\n")
+            except ValueError or IndexError:
+                pass
+        settings.close()
+        return dict_settings
 
-#print(leaderboard_add("resources/leaderboard/leaderboard.txt", "sdf0", "123"))
+
+def settings_update(path, dict_settings):
+    list_dict = list(dict_settings.items())
+    with open(path, 'w') as settings:
+        for entry_num in range(len(list_dict)):
+            if entry_num != len(list_dict) - 1:
+                settings.write(list_dict[entry_num][0] + ":" + list_dict[entry_num][1] + "\n")
+            else:
+                settings.write(list_dict[entry_num][0] + ":" + list_dict[entry_num][1])
+        settings.close()

@@ -159,7 +159,6 @@ class Coin(pygame.sprite.Sprite):
         self.animation_rect.y = round(self.rect_y)
         self.rect_width = self.width - (self.animation_rect.x * 2)
         self.rect_height = self.height - (self.animation_rect.y * 2)
-        #self.rect_height = (self.height / 2) + (self.time_sin * self.av)
         self.animation_rect.width = round(self.rect_width)
         self.animation_rect.height = round(self.rect_height)
         pygame.draw.rect(self.image, (255, 255, 255), self.animation_rect)

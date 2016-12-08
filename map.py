@@ -6,6 +6,7 @@ import math
 import random
 import enemies
 import player
+import file_handling
 from pytmx import *
 from pytmx.util_pygame import load_pygame
 from pygame.locals import *
@@ -139,9 +140,6 @@ class Menu(object):
         self.buttons.append(Button("Leaderboard", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 115]))
         self.buttons.append(Button("Settings", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 180]))
         self.buttons.append(Button("Exit", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 245]))
-        self.switches = list()
-        self.switches.append(Switch([400, 80], self.dt))
-        self.switches.append(Switch([400, 150], self.dt))
 
     def update(self, surface):
         surface.fill((255, 255, 255))
@@ -164,16 +162,32 @@ class Menu(object):
             except IndexError:
                 pass
 
+    def _init_settings(self, settings_path):
+        self.dict_settings = file_handling.settings_read(settings_path)
+        self.switches = list()
+        if self.dict_settings["MUSIC"] == "ON":
+            self.switches.append(Switch([400, 80], self.dt, True))
+        else:
+            self.switches.append(Switch([400, 80], self.dt, False))
+        if self.dict_settings["SOUND"] == "ON":
+            self.switches.append(Switch([400, 150], self.dt, True))
+        else:
+            self.switches.append(Switch([400, 150], self.dt, False))
+
     def display_settings(self, surface, mouse_pos):
         surface.fill((255, 255, 255))
         surface.blit(self.buttons[2].image, (0, 0))
         if self.switches[0].check_state():
+            self.dict_settings['MUSIC'] = "ON"
             surface.blit(self.button_font.render("Music: ON", 1, (0, 0, 0)), [15, 80])
         else:
+            self.dict_settings['MUSIC'] = "OFF"
             surface.blit(self.button_font.render("Music: OFF", 1, (0, 0, 0)), [15, 80])
         if self.switches[1].check_state():
+            self.dict_settings['SOUND'] = "ON"
             surface.blit(self.button_font.render("Sound: ON", 1, (0, 0, 0)), [15, 150])
         else:
+            self.dict_settings['SOUND'] = "OFF"
             surface.blit(self.button_font.render("Sound: OFF", 1, (0, 0, 0)), [15, 150])
 
         for switch in self.switches:
@@ -203,7 +217,7 @@ class Button(object):
 
 
 class Switch(object):
-    def __init__(self, position, dt):
+    def __init__(self, position, dt, state):
         self.dt = dt
         self.back_position = [position[0], position[1]]
         self.front_position = [position[0], position[1]]
@@ -216,9 +230,13 @@ class Switch(object):
         self.back_rect = self.back.get_rect()
         self.front_rect = self.front.get_rect()
         self.moving = False
-        self.direction = True  # True is right, False is left
+        self.direction = not state  # True is right, False is left
         self.velocity = 0
-        self.acceleration = 300
+        if state:
+            self.front_position[0] = self.back_position[0] + 50
+            self.acceleration = -300
+        else:
+            self.acceleration = 300
 
     def draw(self, surface):
         surface.blit(self.back, self.back_position)

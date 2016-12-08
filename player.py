@@ -11,7 +11,6 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self, dt, pos, map_size, walls, wall_type, dict_keys):
         pygame.sprite.Sprite.__init__(self)
-        #self.image = pygame.image.load(os.path.join("resources/sprites/player.png"))
         self.dt = dt
         self.dict_keys = dict_keys
         self.width = 32
@@ -154,8 +153,9 @@ class AnimationRect(pygame.sprite.Sprite):
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, dt, pos):
+    def __init__(self, dt, pos, walls):
         pygame.sprite.Sprite.__init__(self)
+        self.walls = walls
         self.height = 12
         self.width = 24
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA, 32)
@@ -172,6 +172,10 @@ class Bullet(pygame.sprite.Sprite):
         self.velocity = list([self.bullet_speed, 0])
 
     def update(self):
+        for wall in self.walls:
+            if self.rect.colliderect(wall):
+                self.kill()
+
         self.bullet_position[0] += self.dt * self.velocity[0]
         self.bullet_position[1] += self.dt * self.velocity[1]
         self.rect.x = self.bullet_position[0]

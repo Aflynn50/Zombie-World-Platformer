@@ -23,10 +23,13 @@ class Game:
         self.screen_size = list([500, 300])  # Screen size
         self.fp_leaderboard = os.path.join("resources/leaderboard/leaderboard.txt")
         self.fp_icon = os.path.join("resources/sprites/game_icon.png")
-        self.fp_map = os.path.join("resources/maps/map8.tmx")
+        self.fp_map = os.path.join("resources/maps/map10.tmx")
         self.fp_key_bindings = os.path.join("resources/settings/key_bindings.txt")
+        self.fp_settings = os.path.join("resources/settings/settings.txt")
         self.fp_music_main_theme = os.path.join("resources/sounds/foolboymedia_main_theme.wav")
         self.fp_music_menu = os.path.join("resources/sounds/foolboymedia_menu.wav")
+        self.fp_soundfx_explosion = os.path.join("resources/sounds/explosion.wav")
+        self.fp_soundfx_coin = os.path.join("resources/sounds/coin.wav")
         self.dict_keys = {"UP": pygame.K_UP, "DOWN": pygame.K_DOWN, "LEFT": pygame.K_LEFT, "RIGHT": pygame.K_RIGHT, "SHOOT": pygame.K_SPACE, "ENTER": pygame.K_RETURN, "BACKSPACE": pygame.K_BACKSPACE}
         self.dict_keys = file_handling.key_bindings_read(self.fp_key_bindings, self.dict_keys)
         self.DISPLAYSURF = pygame.display.set_mode(self.screen_size)  # Creates the display surface object
@@ -46,11 +49,8 @@ class Game:
         self.sprites.append(self.player1)
         self.screen.add_sprites(self.sprites)  # Adds the list of sprites to the list of things to be displayed by the renderer
         self.keys = 0
-        pygame.mixer.init()
-        self.music_main_theme = pygame.mixer.Sound(self.fp_music_main_theme)
-        self.music_menu = pygame.mixer.Sound(self.fp_music_menu)
-        self.music_menu.set_volume(0.5)
-        self.music_on = False
+
+        self._init_sounds()
 
 
     @staticmethod
@@ -66,6 +66,27 @@ class Game:
             if event.key == K_ESCAPE:
                 self.terminate()  # Calls the function to shut down the program
             pygame.event.post(event)  # put the other KEYUP event objects back
+
+    def _init_sounds(self):  # Loads music and sounds
+        pygame.mixer.init()  # Initiates the pygame sounds module
+        self.music_main_theme = pygame.mixer.Sound(self.fp_music_main_theme)
+        self.music_menu = pygame.mixer.Sound(self.fp_music_menu)
+        self.music_menu.set_volume(0.5)
+        self.soundfx_coin = pygame.mixer.Sound(self.fp_soundfx_coin)
+        self.soundfx_coin.set_volume(0.5)
+        self.soundfx_explosion = pygame.mixer.Sound(self.fp_soundfx_explosion)
+        self.soundfx_explosion.set_volume(0.5)
+        dict_settings = file_handling.settings_read(self.fp_settings)
+        self.music_on = False
+        self.sound_on = False
+        try:
+            if dict_settings["MUSIC"] == "ON":
+                self.music_on = True
+            if dict_settings["SOUND"] == "ON":
+                self.sound_on = True
+        except KeyError:
+            print("Settings file not correctly formatted, please sort it out")
+            self.terminate()
 
     def run(self):
         self.FPSCLOCK = pygame.time.Clock()  # Starts the FPS counter
@@ -90,7 +111,7 @@ class Game:
                 return True
 
             if self.player1.bullet and (time.time() - self.last_bullet > 0.2):
-                bullet = player.Bullet(self.dt, self.player1.player_position)
+                bullet = player.Bullet(self.dt, self.player1.player_position, self.player1.walls)
                 self.bullets.append(bullet)
                 self.screen.group.add(self.bullets[-1])
                 self.bullets_group.add(self.bullets[-1])
@@ -108,6 +129,7 @@ class Game:
                             zombie.death_init()
                             self.screen.group.remove(zombie)
                             self.screen.add_animation(zombie.death_animation_rects)
+                            self.soundfx_explosion.play()
                             self.score += 100
 
                     if self.player1.rect.colliderect(zombie.animation_rect):
@@ -124,6 +146,12 @@ class Game:
 
             for coin in self.screen.coins:
                 coin.update()
+                if self.player1.rect.colliderect(coin.rect):
+                    if self.sound_on:
+                        self.soundfx_coin.play()
+                    self.screen.group.remove(coin)
+                    self.screen.coins.remove(coin)
+                    self.score += 100
 
             self.check_for_quit()
             pygame.display.update()  # Transfers the display surface to the monitor
@@ -166,7 +194,6 @@ class Game:
             self.DISPLAYSURF.blit(self.magneto_font.render("Game over", 1, (0, 0, 0)), (20, 100))
 
             self.keys = pygame.key.get_pressed()
-            #for event in pygame.event.get():
             if self.keys[self.dict_keys["ENTER"]]:
                 return
 
@@ -179,7 +206,6 @@ class Game:
         self.score += (1 / self.timer) * 3000
 
         while True:
-            enter_score = False
             self.check_for_quit()
             self.screen.draw(self.DISPLAYSURF, self.player1, self.timer)
             for event in pygame.event.get(KEYUP):
@@ -233,6 +259,7 @@ class Game:
             self.FPSCLOCK.tick(self.FPS)
 
     def settings(self):
+        self.menu1._init_settings(self.fp_settings)
         while True:
             mouse_pos = (0, 0)
             self.check_for_quit()
@@ -242,14 +269,18 @@ class Game:
             self.menu1.display_settings(self.DISPLAYSURF, mouse_pos)
             self.keys = pygame.key.get_pressed()
             if self.keys[self.dict_keys["BACKSPACE"]]:
+                if self.menu1.dict_settings["MUSIC"] == "ON":
+                    self._init_sounds()
+                    self.music_menu.play(-1)
+                else:
+                    pygame.mixer.fadeout(500)
+                file_handling.settings_update(self.fp_settings, self.menu1.dict_settings)
                 return
 
             pygame.display.update()
             self.FPSCLOCK.tick(self.FPS)
 
-
 newgame = Game()  # Initialises the game object
-gameOver = newgame.run()  # Runs game
 while True:
-    newgame = Game()
-    gameOver = newgame.run()
+    newgame.__init__()
+    newgame.run()  # Runs game forever
