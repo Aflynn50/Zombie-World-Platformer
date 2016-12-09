@@ -86,11 +86,6 @@ class TiledRenderer(object):
         self.group.draw(surface)
         surface.blit(self.timer_font.render("{0:.2f}".format(time), 1, (0, 0, 0)), (20, 15))
 
-    def spawn_zombies(self):
-        for zombie in self.spawn_points:
-            self.zombies.append(enemies.Zombie(self.dt, self.walls, self.map_size, zombie))
-            self.group.add(self.zombies[-1])
-
     def add_sprites(self, sprites):
         for sprite in sprites:
             self.group.add(sprite)
