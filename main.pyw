@@ -117,7 +117,7 @@ class Game:
                 self.bullets_group.add(self.bullets[-1])
                 self.last_bullet = time.time()
 
-            self.screen.draw(self.DISPLAYSURF, self.player1, (time.time() - self.timer))  # Updates the screen
+            #self.screen.draw(self.DISPLAYSURF, self.player1, (time.time() - self.timer), self.score)  # Updates the screen
             for zombie in self.screen.zombies:
                 if not zombie.dead:
                     for bullet in self.bullets:
@@ -129,7 +129,8 @@ class Game:
                             zombie.death_init()
                             self.screen.group.remove(zombie)
                             self.screen.add_animation(zombie.death_animation_rects)
-                            self.soundfx_explosion.play()
+                            if self.sound_on:
+                                self.soundfx_explosion.play()
                             self.score += 100
 
                     if self.player1.rect.colliderect(zombie.animation_rect):
@@ -153,6 +154,8 @@ class Game:
                     self.screen.coins.remove(coin)
                     self.score += 100
 
+            self.screen.draw(self.DISPLAYSURF, self.player1, (time.time() - self.timer),
+                             self.score)  # Updates the screen
             self.check_for_quit()
             pygame.display.update()  # Transfers the display surface to the monitor
             self.FPSCLOCK.tick(self.FPS)
@@ -184,12 +187,14 @@ class Game:
             self.FPSCLOCK.tick(self.FPS)
 
     def game_over(self):
+        if self.sound_on:
+            self.soundfx_explosion.play()
         self.screen.add_animation(self.player1.death_animation_init_())
         self.screen.remove_sprites(self.sprites)
         self.timer = time.time() - self.timer
         while True:
             self.check_for_quit()
-            self.screen.draw(self.DISPLAYSURF, self.player1, self.timer)
+            self.screen.draw(self.DISPLAYSURF, self.player1, self.timer, self.score)
             self.player1.death_animation_update()
             self.DISPLAYSURF.blit(self.magneto_font.render("Game over", 1, (0, 0, 0)), (20, 100))
 
@@ -203,11 +208,11 @@ class Game:
     def win(self):
         self.screen.remove_sprites(self.sprites)
         self.timer = time.time() - self.timer
-        self.score += (1 / self.timer) * 3000
+        self.score += (1 / self.timer) * 30000
 
         while True:
             self.check_for_quit()
-            self.screen.draw(self.DISPLAYSURF, self.player1, self.timer)
+            self.screen.draw(self.DISPLAYSURF, self.player1, self.timer, self.score)
             for event in pygame.event.get(KEYUP):
                 if event.key == self.dict_keys["ENTER"]:
                     try:
@@ -265,16 +270,19 @@ class Game:
             self.check_for_quit()
             for event in pygame.event.get(MOUSEBUTTONUP):
                 mouse_pos = event.pos
+                if self.menu1.settings_button.click(event.pos):
+                    if self.menu1.dict_settings["MUSIC"] == "ON":
+                        if not pygame.mixer.get_busy():
+                            self._init_sounds()
+                            self.music_menu.play(-1)
+                    else:
+                        pygame.mixer.fadeout(500)
+                    file_handling.settings_update(self.fp_settings, self.menu1.dict_settings)
+                    return
 
             self.menu1.display_settings(self.DISPLAYSURF, mouse_pos)
             self.keys = pygame.key.get_pressed()
             if self.keys[self.dict_keys["BACKSPACE"]]:
-                if self.menu1.dict_settings["MUSIC"] == "ON":
-                    self._init_sounds()
-                    self.music_menu.play(-1)
-                else:
-                    pygame.mixer.fadeout(500)
-                file_handling.settings_update(self.fp_settings, self.menu1.dict_settings)
                 return
 
             pygame.display.update()

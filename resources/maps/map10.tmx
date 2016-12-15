@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="256" height="48" tilewidth="16" tileheight="16" nextobjectid="71">
- <tileset firstgid="1" name="black_white_tileset" tilewidth="16" tileheight="16" tilecount="19" columns="6">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="256" height="48" tilewidth="16" tileheight="16" nextobjectid="82">
+ <tileset firstgid="1" name="black_white_tileset" tilewidth="16" tileheight="16" tilecount="18" columns="6">
   <image source="black_white_tileset.png" width="96" height="48"/>
  </tileset>
  <layer name="Tile Layer 1" width="256" height="48">
@@ -65,11 +65,20 @@
   <object id="18" name="zombie" x="775" y="641" width="16" height="16"/>
   <object id="19" name="zombie" x="648" y="646" width="16" height="16"/>
   <object id="43" name="coin" x="2120" y="152" width="16" height="16"/>
-  <object id="44" name="coin" x="1864" y="728" width="16" height="16"/>
   <object id="62" name="zombie" x="3239" y="459" width="16" height="16"/>
   <object id="63" name="zombie" x="2969" y="598" width="16" height="16"/>
   <object id="64" name="zombie" x="3289" y="706" width="16" height="16"/>
   <object id="65" name="zombie" x="3445" y="642" width="16" height="16"/>
+  <object id="71" name="coin" x="1296" y="640" width="16" height="16"/>
+  <object id="72" name="coin" x="1664" y="368" width="16" height="16"/>
+  <object id="74" name="coin" x="1864" y="440" width="16" height="16"/>
+  <object id="75" name="coin" x="1752" y="536" width="16" height="16"/>
+  <object id="76" name="coin" x="2392" y="392" width="16" height="16"/>
+  <object id="77" name="coin" x="2688" y="688" width="16" height="16"/>
+  <object id="78" name="coin" x="3384" y="616" width="16" height="16"/>
+  <object id="79" name="coin" x="3528" y="344" width="16" height="16"/>
+  <object id="80" name="coin" x="4056" y="584" width="16" height="16"/>
+  <object id="81" name="coin" x="3240" y="392" width="16" height="16"/>
  </objectgroup>
  <objectgroup name="collision_layer">
   <object id="3" name="platform" x="254" y="560" width="64" height="16"/>

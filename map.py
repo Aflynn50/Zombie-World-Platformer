@@ -78,13 +78,14 @@ class TiledRenderer(object):
         #self.spawn_zombies()
         #self.group.add(player)
 
-    def draw(self, surface, player, time):
+    def draw(self, surface, player, time, score):
 
         self.group.center(player.rect.center)
         # draw the map and all sprites
 
         self.group.draw(surface)
         surface.blit(self.timer_font.render("{0:.2f}".format(time), 1, (0, 0, 0)), (20, 15))
+        surface.blit(self.timer_font.render(str(int(score)), 1, (0, 0, 0)), (450, 15))
 
     def add_sprites(self, sprites):
         for sprite in sprites:
@@ -131,10 +132,10 @@ class Menu(object):
         self.title_font = pygame.font.SysFont("magneto", 40)
         self.title = self.title_font.render("Zombie world", 1, (0, 0, 0))
         self.buttons = list()
-        self.buttons.append(Button("Play", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 50]))
-        self.buttons.append(Button("Leaderboard", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 115]))
-        self.buttons.append(Button("Settings", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 180]))
-        self.buttons.append(Button("Exit", [20, 15], self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 245]))
+        self.buttons.append(Button("Play", self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 50]))
+        self.buttons.append(Button("Leaderboard", self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 115]))
+        self.buttons.append(Button("Settings", self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 180]))
+        self.buttons.append(Button("Exit", self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 245]))
 
     def update(self, surface):
         surface.fill((255, 255, 255))
@@ -160,6 +161,7 @@ class Menu(object):
     def _init_settings(self, settings_path):
         self.dict_settings = file_handling.settings_read(settings_path)
         self.switches = list()
+        self.settings_button = Button("Save", self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 250])
         if self.dict_settings["MUSIC"] == "ON":
             self.switches.append(Switch([400, 80], self.dt, True))
         else:
@@ -172,6 +174,7 @@ class Menu(object):
     def display_settings(self, surface, mouse_pos):
         surface.fill((255, 255, 255))
         surface.blit(self.buttons[2].image, (0, 0))
+        surface.blit(self.settings_button.image, (0, 250))
         if self.switches[0].check_state():
             self.dict_settings['MUSIC'] = "ON"
             surface.blit(self.button_font.render("Music: ON", 1, (0, 0, 0)), [15, 80])
@@ -189,9 +192,12 @@ class Menu(object):
             switch.update(mouse_pos)
             switch.draw(surface)
 
+    #def display_levels(self):
+
+
 
 class Button(object):
-    def __init__(self, text, text_pos, font, size, colour, screen_pos):
+    def __init__(self, text, font, size, colour, screen_pos):
         self.screen_pos = screen_pos
         self.text = text
         self.image = pygame.Surface(size)
@@ -200,7 +206,7 @@ class Button(object):
             self.text_colour = (255, 255, 255)
         else:
             self.text_colour = (0, 0, 0)
-        self.image.blit(font.render(text, 1, self.text_colour), (text_pos[0], text_pos[1]))
+        self.image.blit(font.render(text, 1, self.text_colour), (20, 15))
         self.rect = self.image.get_rect()
         self.rect.x = screen_pos[0]
         self.rect.y = screen_pos[1]
