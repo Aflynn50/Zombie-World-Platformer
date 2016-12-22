@@ -1,16 +1,13 @@
-import pygame
+import os
 import sys
 import time
-import os
-import random
-import math
-import collision
-import enemies
+
+import pygame
+from pygame.locals import *
+
+import file_handling
 import map
 import player
-import file_handling
-from pygame.locals import *
-from pygame import gfxdraw
 
 
 class Game:

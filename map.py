@@ -1,18 +1,14 @@
-import pygame
-import sys
-import time
-import os
-import math
 import random
-import enemies
-import player
-import file_handling
-from pytmx import *
-from pytmx.util_pygame import load_pygame
-from pygame.locals import *
+
+import pygame
 import pyscroll
 import pyscroll.data
 from pyscroll.group import PyscrollGroup
+from pytmx.util_pygame import load_pygame
+
+import enemies
+import file_handling
+import player
 
 
 class TiledRenderer(object):

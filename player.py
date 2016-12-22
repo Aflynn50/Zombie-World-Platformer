@@ -1,10 +1,10 @@
-import pygame
-import sys
-import time
-import os
-import math
 import random
-from pygame.locals import *
+import time
+
+import pygame
+
+
+#from pygame.locals import *
 
 
 class Player(pygame.sprite.Sprite):

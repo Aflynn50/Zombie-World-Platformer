@@ -1,15 +1,12 @@
-import pygame
-import sys
-import time
-import os
 import math
-import random
-import pytmx
-import collision
-import map
+import time
+
+import pygame
+
 import player
-from pygame.locals import *
-from pygame import gfxdraw
+
+
+#from pygame.locals import *
 
 
 class Zombie(pygame.sprite.Sprite):
