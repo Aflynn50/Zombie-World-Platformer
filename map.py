@@ -192,7 +192,27 @@ class Menu(object):
             switch.update(mouse_pos)
             switch.draw(surface)
 
-    #def display_levels(self):
+    def _init_levels(self, levels):
+        self.level_buttons = list()
+        for level in levels:
+            name = level[:level.index(".")]
+            self.level_buttons.append(Button(name, self.button_font, [self.screen_size[0], 45], (0, 0, 0), [0, 0]))
+
+    def display_levels(self, surface, scroll_position, mode):
+        surface.fill((255, 255, 255))
+        button_pos = [0, 60]
+        try:
+            for position in range(4):
+                self.level_buttons[scroll_position + position].screen_pos = list(button_pos)
+                button_pos[1] += 60
+                surface.blit(self.level_buttons[scroll_position + position].image, self.level_buttons[scroll_position + position].screen_pos)
+        except IndexError:
+            pass
+
+        if mode == "leaderboard":
+            surface.blit(self.title_font.render("Leaderboards", 1, (0, 0, 0)), (90, 0))
+        else:
+            surface.blit(self.title_font.render("Levels", 1, (0, 0, 0)), (150, 0))
 
 
 
@@ -212,6 +232,8 @@ class Button(object):
         self.rect.y = screen_pos[1]
 
     def click(self, pos):
+        self.rect.x = self.screen_pos[0]
+        self.rect.y = self.screen_pos[1]
         if self.rect.collidepoint(pos):
             return True
         return False

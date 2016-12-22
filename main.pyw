@@ -21,9 +21,13 @@ class Game:
         self.FPS = 60
         self.dt = 1 / self.FPS  # The time for each frame
         self.screen_size = list([500, 300])  # Screen size
-        self.fp_leaderboard = os.path.join("resources/leaderboard/leaderboard.txt")
+        self.fp_leaderboard_folder = os.path.join("resources/leaderboard/")
+        self.fp_leaderboard = ""
         self.fp_icon = os.path.join("resources/sprites/game_icon.png")
-        self.fp_map = os.path.join("resources/maps/map10.tmx")
+        self.fp_level_folder = os.path.join("resources/maps/")
+
+        self.level_folder_contents = file_handling.load_maps(os.path.join(self.fp_level_folder))
+
         self.fp_key_bindings = os.path.join("resources/settings/key_bindings.txt")
         self.fp_settings = os.path.join("resources/settings/settings.txt")
         self.fp_music_main_theme = os.path.join("resources/sounds/foolboymedia_main_theme.wav")
@@ -44,13 +48,16 @@ class Game:
         self.timer = time.time()
         self.score = 0
         self.game_over_flag = False
+        self.FPSCLOCK = pygame.time.Clock()
+        self._init_sounds()
+        self.level = ""
+        self.fp_map = self.menu()
         self.screen = map.TiledRenderer(self.fp_map, self.DISPLAYSURF, self.dt)  # Loads the maps from the tmx file and initialises the map drawing object
         self.player1 = player.Player(self.dt, self.screen.player_pos, self.screen.map_size, self.screen.walls, self.screen.wall_type, self.dict_keys)  # Initialises a new player object
         self.sprites.append(self.player1)
         self.screen.add_sprites(self.sprites)  # Adds the list of sprites to the list of things to be displayed by the renderer
-        self.keys = 0
+        self.keys = None
 
-        self._init_sounds()
 
 
     @staticmethod
@@ -90,7 +97,6 @@ class Game:
 
     def run(self):
         self.FPSCLOCK = pygame.time.Clock()  # Starts the FPS counter
-        self.menu()
         self.timer = time.time()
         if self.music_on:
             self.music_main_theme.play(-1)
@@ -161,32 +167,39 @@ class Game:
             self.FPSCLOCK.tick(self.FPS)
 
     def menu(self):
+        pygame.event.clear()
         if self.music_on:
             self.music_menu.play(-1)
         while True:
             self.check_for_quit()
-            self.keys = pygame.key.get_pressed()
             self.menu1.update(self.DISPLAYSURF)
             for event in pygame.event.get():
                 if event.type == MOUSEBUTTONUP:
                     button_clicked = self.menu1.click(event.pos)
                     if button_clicked == "Play":
-                        self.music_menu.fadeout(500)
-                        return
+                        map = self.level_select()
+                        if map != "back":
+                            self.music_menu.fadeout(500)
+                            return map
                     elif button_clicked == "Exit":
                         self.terminate()
                     elif button_clicked == "Leaderboard":
-                        self.leader_board()
+                        self.leaderboard_level_select()
                     elif button_clicked == "Settings":
                         self.settings()
 
-                elif self.keys[self.dict_keys["ENTER"]]:
-                    self.music_menu.fadeout(500)
-                    return
+                if event.type == KEYUP:
+                    if event.key == self.dict_keys["ENTER"]:
+                        map = self.level_select()
+                        if map != "back":
+                            self.music_menu.fadeout(500)
+                            return map
+
             pygame.display.update()  # Transfers the display surface to the monitor
             self.FPSCLOCK.tick(self.FPS)
 
     def game_over(self):
+        pygame.event.clear()
         if self.sound_on:
             self.soundfx_explosion.play()
         self.screen.add_animation(self.player1.death_animation_init_())
@@ -198,97 +211,179 @@ class Game:
             self.player1.death_animation_update()
             self.DISPLAYSURF.blit(self.magneto_font.render("Game over", 1, (0, 0, 0)), (20, 100))
 
-            self.keys = pygame.key.get_pressed()
-            if self.keys[self.dict_keys["ENTER"]]:
-                return
+            for event in pygame.event.get():
+                if event.type == KEYUP:
+                    if event.key == self.dict_keys["ENTER"]:
+                        return
 
             pygame.display.update()  # Transfers the display surface to the monitor
             self.FPSCLOCK.tick(self.FPS)
 
     def win(self):
+        pygame.event.clear()
         self.screen.remove_sprites(self.sprites)
         self.timer = time.time() - self.timer
-        self.score += (1 / self.timer) * 30000
+        self.score += self.screen.map_size[0] / self.timer
 
         while True:
             self.check_for_quit()
             self.screen.draw(self.DISPLAYSURF, self.player1, self.timer, self.score)
-            for event in pygame.event.get(KEYUP):
-                if event.key == self.dict_keys["ENTER"]:
-                    try:
-                        if file_handling.leaderboard_check(self.fp_leaderboard)[10] < self.score:
+            for event in pygame.event.get():
+                if event.type == KEYUP:
+                    if event.key == self.dict_keys["ENTER"]:
+                        try:
+                            if file_handling.leaderboard_check(self.fp_leaderboard_folder + self.level + ".txt")[10] < self.score:
+                                self.leader_board_entry()
+                        except IndexError:
                             self.leader_board_entry()
-                    except IndexError:
-                        self.leader_board_entry()
-                    return
+                        return
 
             self.screen.win_update(self.DISPLAYSURF, self.score)
             pygame.display.update()
             self.FPSCLOCK.tick(self.FPS)
 
     def leader_board_entry(self):
+        pygame.event.clear()
         name = ""
         while True:
             self.check_for_quit()
-            for event in pygame.event.get(KEYUP):
-                if event.key == self.dict_keys["ENTER"] and len(name) > 0:
-                    file_handling.leaderboard_add(self.fp_leaderboard, name, int(self.score))
-                    return
-                elif event.key == self.dict_keys["BACKSPACE"]:
-                    print("a")
-                    name = name[:(len(name) - 1)]
-                elif len(name) < 4 and event.key <= 127:
-                    if chr(event.key).isalpha():
-                        name += chr(event.key).capitalize()
+            for event in pygame.event.get():
+                if event.type == KEYUP:
+                    if event.key == self.dict_keys["ENTER"] and len(name) > 0:
+                        self.fp_leaderboard = self.fp_leaderboard_folder + self.level + ".txt"
+                        file_handling.leaderboard_add(self.fp_leaderboard, name, int(self.score))
+                        return
+                    elif event.key == self.dict_keys["BACKSPACE"]:
+                        name = name[:(len(name) - 1)]
+                    elif len(name) < 4 and event.key <= 127:
+                        if chr(event.key).isalpha():
+                            name += chr(event.key).capitalize()
 
             self.screen.enter_score(self.DISPLAYSURF, name)
             pygame.display.update()
             self.FPSCLOCK.tick(self.FPS)
 
     def leader_board(self):
+        pygame.event.clear()
         leaderboard = file_handling.leaderboard_read(self.fp_leaderboard)
         scroll_position = 0
         while True:
             self.check_for_quit()
             self.menu1.display_leaderboard(self.DISPLAYSURF, leaderboard, scroll_position)
-            for event in pygame.event.get(KEYUP):
-                if (event.key == self.dict_keys["UP"]) and scroll_position > 0:
-                    scroll_position -= 1
-                elif (event.key == self.dict_keys["DOWN"]) and scroll_position < (len(leaderboard) - 1):
-                    scroll_position += 1
+            for event in pygame.event.get():
+                if event.type == KEYUP:
+                    if (event.key == self.dict_keys["UP"]) and scroll_position > 0:
+                        scroll_position -= 1
+                    elif (event.key == self.dict_keys["DOWN"]) and scroll_position < (len(leaderboard) - 1):
+                        scroll_position += 1
+                    elif event.key == self.dict_keys["BACKSPACE"]:
+                        return
 
-            self.keys = pygame.key.get_pressed()
-            if self.keys[self.dict_keys["BACKSPACE"]]:
-                return
             pygame.display.update()
             self.FPSCLOCK.tick(self.FPS)
 
     def settings(self):
+        pygame.event.clear()
         self.menu1._init_settings(self.fp_settings)
         while True:
             mouse_pos = (0, 0)
             self.check_for_quit()
-            for event in pygame.event.get(MOUSEBUTTONUP):
-                mouse_pos = event.pos
-                if self.menu1.settings_button.click(event.pos):
-                    if self.menu1.dict_settings["MUSIC"] == "ON":
-                        if not pygame.mixer.get_busy():
-                            self._init_sounds()
-                            self.music_menu.play(-1)
-                    else:
-                        pygame.mixer.fadeout(500)
-                    file_handling.settings_update(self.fp_settings, self.menu1.dict_settings)
-                    return
+            for event in pygame.event.get():
+                if event.type == MOUSEBUTTONUP:
+                    mouse_pos = event.pos
+                    if self.menu1.settings_button.click(event.pos):
+                        if self.menu1.dict_settings["MUSIC"] == "ON":
+                            if not pygame.mixer.get_busy():
+                                self._init_sounds()
+                                self.music_menu.play(-1)
+                        else:
+                            pygame.mixer.fadeout(500)
+                        file_handling.settings_update(self.fp_settings, self.menu1.dict_settings)
+                        return
+                if event.type == KEYUP:
+                    if event.key == self.dict_keys["BACKSPACE"]:
+                        return
 
             self.menu1.display_settings(self.DISPLAYSURF, mouse_pos)
-            self.keys = pygame.key.get_pressed()
-            if self.keys[self.dict_keys["BACKSPACE"]]:
-                return
 
             pygame.display.update()
             self.FPSCLOCK.tick(self.FPS)
 
-newgame = Game()  # Initialises the game object
+    def level_select(self):
+        pygame.event.clear()
+        self.menu1._init_levels(self.level_folder_contents)
+        scroll_position = 0
+        while True:
+            self.check_for_quit()
+            self.menu1.display_levels(self.DISPLAYSURF, scroll_position, "play")
+            level_buttons = self.menu1.level_buttons
+            for event in pygame.event.get():
+                if event.type == MOUSEBUTTONUP:
+                    try:
+                        for button in level_buttons[scroll_position: scroll_position + 4]:
+                            if button.click(event.pos):
+                                self.level = button.text
+                                return self.fp_level_folder + button.text + ".tmx"
+                    except IndexError:
+                        pass
+                if event.type == KEYUP:
+                    if (event.key == self.dict_keys["UP"]) and scroll_position > 0:
+                        scroll_position -= 1
+                    elif (event.key == self.dict_keys["DOWN"]) and scroll_position < (len(level_buttons) - 1):
+                        scroll_position += 1
+                    if event.key == self.dict_keys["BACKSPACE"]:
+                        return "back"
+                    if event.key == self.dict_keys["ENTER"]:
+                        mouse_pos = pygame.mouse.get_pos()
+                        try:
+                            for button in level_buttons[scroll_position: scroll_position + 4]:
+                                if button.click(mouse_pos):
+                                    self.level = button.text
+                                    return self.fp_level_folder + button.text + ".tmx"
+                        except IndexError:
+                            pass
+
+            pygame.display.update()
+            self.FPSCLOCK.tick(self.FPS)
+
+    def leaderboard_level_select(self):
+        pygame.event.clear()
+        self.menu1._init_levels(self.level_folder_contents)
+        scroll_position = 0
+        while True:
+            self.check_for_quit()
+            self.menu1.display_levels(self.DISPLAYSURF, scroll_position, "leaderboard")
+            level_buttons = self.menu1.level_buttons
+            for event in pygame.event.get():
+                if event.type == MOUSEBUTTONUP:
+                    try:
+                        for button in level_buttons[scroll_position: scroll_position + 4]:
+                            if button.click(event.pos):
+                                self.fp_leaderboard = self.fp_leaderboard_folder + button.text + ".txt"
+                                self.leader_board()
+                    except IndexError:
+                        pass
+                if event.type == KEYUP:
+                    if (event.key == self.dict_keys["UP"]) and scroll_position > 0:
+                        scroll_position -= 1
+                    elif (event.key == self.dict_keys["DOWN"]) and scroll_position < (len(level_buttons) - 1):
+                        scroll_position += 1
+                    if event.key == self.dict_keys["BACKSPACE"]:
+                        return
+                    if event.key == self.dict_keys["ENTER"]:
+                        mouse_pos = pygame.mouse.get_pos()
+                        try:
+                            for button in level_buttons[scroll_position: scroll_position + 4]:
+                                if button.click(mouse_pos):
+                                    self.fp_leaderboard = self.fp_leaderboard_folder + button.text + ".txt"
+                                    self.leader_board()
+                        except IndexError:
+                            pass
+
+            pygame.display.update()
+            self.FPSCLOCK.tick(self.FPS)
+
+
 while True:
-    newgame.__init__()
+    newgame = Game()  # Initialises the game object
     newgame.run()  # Runs game forever
