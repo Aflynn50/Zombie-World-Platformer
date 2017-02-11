@@ -157,7 +157,7 @@ class Menu(object):
     def _init_settings(self, settings_path):
         self.dict_settings = file_handling.settings_read(settings_path)
         self.switches = list()
-        self.settings_button = Button("Save", self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 250])
+        self.save_button = Button("Save", self.button_font, [self.screen_size[0], 50], (0, 0, 0), [0, 250])
         if self.dict_settings["MUSIC"] == "ON":
             self.switches.append(Switch([400, 80], self.dt, True))
         else:
@@ -170,7 +170,7 @@ class Menu(object):
     def display_settings(self, surface, mouse_pos):
         surface.fill((255, 255, 255))
         surface.blit(self.buttons[2].image, (0, 0))
-        surface.blit(self.settings_button.image, (0, 250))
+        surface.blit(self.save_button.image, (0, 250))
         if self.switches[0].check_state():
             self.dict_settings['MUSIC'] = "ON"
             surface.blit(self.button_font.render("Music: ON", 1, (0, 0, 0)), [15, 80])

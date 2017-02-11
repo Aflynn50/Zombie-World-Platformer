@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Platformer.iml" filepath="$PROJECT_DIR$/.idea/Platformer.iml" />
-      <module fileurl="file://$USER_HOME$/Downloads/pywonderland-master/.idea/pywonderland-master.iml" filepath="$USER_HOME$/Downloads/pywonderland-master/.idea/pywonderland-master.iml" />
-    </modules>
+   </modules>
   </component>
 </project>

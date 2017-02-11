@@ -4,9 +4,6 @@ import time
 import pygame
 
 
-#from pygame.locals import *
-
-
 class Player(pygame.sprite.Sprite):
 
     def __init__(self, dt, pos, map_size, walls, wall_type, dict_keys):
@@ -53,11 +50,11 @@ class Player(pygame.sprite.Sprite):
         self.collision = False
         self.collision_list = []
 
-        if keys[self.dict_keys["RIGHT"]]:
+        if keys[self.dict_keys["RIGHT"]] or keys[self.dict_keys["ALTRIGHT"]]:
             self.right = True
-        if keys[self.dict_keys["LEFT"]]:
+        if keys[self.dict_keys["LEFT"]] or keys[self.dict_keys["ALTLEFT"]]:
             self.left = True
-        if keys[self.dict_keys["UP"]]:
+        if keys[self.dict_keys["UP"]] or keys[self.dict_keys["ALTUP"]]:
             self.up = True
         if keys[self.dict_keys["SHOOT"]]:
             self.bullet = True
@@ -182,6 +179,3 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y = self.bullet_position[1]
         if self.bullet_position[0] - self.start_pos[0] > self.despawn_distance:
             self.kill()
-
-
-

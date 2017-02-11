@@ -11,7 +11,7 @@ import player
 
 class Zombie(pygame.sprite.Sprite):
 
-    def __init__(self, dt, walls, map_size, pos):
+    def __init__(self, dt, walls, map_size, pos):  #
         pygame.sprite.Sprite.__init__(self)
         self.dt = dt
 
